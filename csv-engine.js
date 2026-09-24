@@ -857,9 +857,127 @@
     return [headerRow, separatorRow, ...rowStrings].join('\n');
   }
 
+  /**
+   * Parse an Array-of-Arrays (AOA) as returned by SheetJS or custom table extractors
+   * into structured records { headers, data, meta }
+   */
+  function fromAOA(rows, options = {}) {
+    const opts = {
+      hasHeader: options.hasHeader !== false,
+      trimFields: options.trimFields !== false,
+      ...options
+    };
+
+    if (!rows || !Array.isArray(rows) || rows.length === 0) {
+      return {
+        headers: [],
+        data: [],
+        meta: { delimiter: 'Excel', rowCount: 0, columnCount: 0, parsedAt: new Date().toISOString() }
+      };
+    }
+
+    // Filter out completely blank rows
+    const cleanRows = rows.filter(r => Array.isArray(r) && r.some(cell => cell !== '' && cell !== null && cell !== undefined && String(cell).trim() !== ''));
+    if (cleanRows.length === 0) {
+      return {
+        headers: [],
+        data: [],
+        meta: { delimiter: 'Excel', rowCount: 0, columnCount: 0, parsedAt: new Date().toISOString() }
+      };
+    }
+
+    let headers = [];
+    let dataRows = [];
+
+    if (opts.hasHeader) {
+      const rawHeaders = cleanRows[0];
+      const seenHeaders = {};
+      headers = rawHeaders.map((h, idx) => {
+        let name = h !== null && h !== undefined && String(h).trim() ? String(h).trim() : `Coluna_${idx + 1}`;
+        if (seenHeaders[name]) {
+          seenHeaders[name]++;
+          name = `${name}_${seenHeaders[name]}`;
+        } else {
+          seenHeaders[name] = 1;
+        }
+        return name;
+      });
+      dataRows = cleanRows.slice(1);
+    } else {
+      const colCount = Math.max(...cleanRows.map(r => r.length));
+      headers = Array.from({ length: colCount }, (_, idx) => `Coluna_${idx + 1}`);
+      dataRows = cleanRows;
+    }
+
+    const data = new Array(dataRows.length);
+    for (let i = 0; i < dataRows.length; i++) {
+      const row = dataRows[i];
+      const record = {};
+      for (let j = 0; j < headers.length; j++) {
+        let val = row[j];
+        if (val instanceof Date) {
+          const roundedDate = new Date(Math.round(val.getTime() / 1000) * 1000);
+          const y = roundedDate.getUTCFullYear();
+          const m = String(roundedDate.getUTCMonth() + 1).padStart(2, '0');
+          const d = String(roundedDate.getUTCDate()).padStart(2, '0');
+          val = `${y}-${m}-${d}`;
+        } else if (val === null || val === undefined) {
+          val = '';
+        } else if (typeof val === 'number') {
+          val = String(val);
+        } else if (typeof val === 'boolean') {
+          val = String(val);
+        } else if (typeof val === 'string') {
+          val = opts.trimFields ? val.trim() : val;
+        }
+        record[headers[j]] = val;
+      }
+      data[i] = record;
+    }
+
+    return {
+      headers,
+      data,
+      meta: {
+        delimiter: 'Excel',
+        rowCount: data.length,
+        columnCount: headers.length,
+        parsedAt: new Date().toISOString()
+      }
+    };
+  }
+
+  /**
+   * Export dataset to Excel workbook ArrayBuffer using SheetJS (XLSX) if available
+   */
+  function toExcel(headers, data, options = {}) {
+    const xlsxLib = options.xlsx || (typeof XLSX !== 'undefined' ? XLSX : null);
+    if (!xlsxLib) {
+      throw new Error('XLSX library is not loaded');
+    }
+
+    const visibleHeaders = options.visibleHeaders || headers;
+    const sheetName = (options.sheetName || 'Dados').slice(0, 31);
+
+    const aoa = [visibleHeaders];
+    for (let i = 0; i < data.length; i++) {
+      const row = data[i];
+      const line = visibleHeaders.map(h => row[h] !== undefined && row[h] !== null ? row[h] : '');
+      aoa.push(line);
+    }
+
+    const wb = xlsxLib.utils.book_new();
+    const ws = xlsxLib.utils.aoa_to_sheet(aoa);
+    xlsxLib.utils.book_append_sheet(wb, ws, sheetName);
+
+    return xlsxLib.write(wb, { type: 'array', bookType: 'xlsx' });
+  }
+
   return {
     sniffDelimiter,
     parse,
+    fromAOA,
+    toExcel,
     parseNumber,
     parseDate,
     castValue,

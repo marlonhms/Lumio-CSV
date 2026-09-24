@@ -55,6 +55,12 @@ Construído inteiramente em **Vanilla JavaScript puro (zero dependências)**, o 
 - **Abertura Silenciosa**: inicializadores modernos sem abrir janelas pretas de terminal.
 - **100% Privado e Seguro**: nenhum dado é enviado para servidores externos.
 
+### 📊 Suporte a Planilhas Excel (.xlsx e .xls) & Multi-Abas
+- **Compatibilidade Completa**: abra arquivos Excel modernos (**`.xlsx`**) e planilhas legadas do Excel 97-2004 (**`.xls`** binário BIFF8), além de `.csv`, `.tsv` e `.txt`.
+- **Seletor de Abas Liquid Glass**: se a planilha contiver múltiplas abas (*Sheets*), uma barra elegante de abas permite alternar entre elas instantaneamente sem recarregar o arquivo.
+- **Carregamento Sob Demanda (*Lazy Loading*)**: o motor de leitura do Excel é carregado de forma assíncrona, mantendo o carregamento inicial do Lumio CSV instantâneo e ultra leve.
+- **100% Offline & Local**: o processamento roda inteiramente no cliente via biblioteca vendor embutida, sem envio para a nuvem.
+
 ### 🎯 Detecção Inteligente Automática (*Smart Sniffing*)
 - **Detecção de Delimitador**: detecta automaticamente vírgula (`,`), ponto e vírgula (`;`), tabulação (`\t`) e barra vertical (`|`).
 - **Suporte a Padrão Brasileiro e Internacional**: reconhece números com vírgula ou ponto decimal, moedas (`R$`, `$`, `€`), percentuais e datas (`DD/MM/AAAA` ou `YYYY-MM-DD`).
@@ -88,8 +94,8 @@ Construído inteiramente em **Vanilla JavaScript puro (zero dependências)**, o 
 - Edite valores de campos diretamente no inspetor.
 
 ### 💾 Exportação Flexível e Conversão
-- **Salvar CSV (`Ctrl+S`)**: baixe imediatamente o CSV modificado.
-- Exporte para **CSV Padrão** (vírgula), **CSV Brasileiro** (ponto e vírgula), **JSON**, **TSV** ou **Tabela Markdown**.
+- **Salvar Rápido (`Ctrl+S`)**: baixe imediatamente o arquivo atualizado (salva como `.xlsx` para planilhas ou `.csv` para arquivos de texto).
+- Exporte para **Planilha Excel (.xlsx)**, **CSV Padrão** (vírgula), **CSV Brasileiro** (ponto e vírgula), **JSON**, **TSV** ou **Tabela Markdown**.
 - Opção para exportar apenas as linhas filtradas ou colunas visíveis.
 
 ---

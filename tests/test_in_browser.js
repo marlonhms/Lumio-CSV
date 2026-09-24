@@ -11,6 +11,8 @@ const mimeTypes = {
   '.json': 'application/json; charset=utf-8',
   '.webmanifest': 'application/manifest+json; charset=utf-8',
   '.csv': 'text/csv; charset=utf-8',
+  '.xls': 'application/vnd.ms-excel',
+  '.xlsx': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
   '.svg': 'image/svg+xml',
   '.png': 'image/png',
   '.ico': 'image/x-icon'
@@ -235,7 +237,58 @@ async function main() {
       throw new Error('Install modal open/close failed');
     }
 
-    console.log('✔ Headless browser test passed successfully!');
+    // Test 4: Excel Multi-Sheet In-Browser Verification
+    const XLSX = require(path.join(ROOT, 'assets/vendor/xlsx.full.min.js'));
+    const wb = XLSX.utils.book_new();
+    const ws1 = XLSX.utils.aoa_to_sheet([['Produto', 'Preco'], ['Notebook Dell', 5000], ['Mouse Sem Fio', 120]]);
+    const ws2 = XLSX.utils.aoa_to_sheet([['Cidade', 'UF'], ['São Paulo', 'SP'], ['Curitiba', 'PR']]);
+    XLSX.utils.book_append_sheet(wb, ws1, 'Hardware');
+    XLSX.utils.book_append_sheet(wb, ws2, 'Filiais');
+    const xlsxBase64 = XLSX.write(wb, { type: 'base64', bookType: 'xlsx' });
+
+    const excelBrowserTest = await send('Runtime.evaluate', {
+      expression: `
+        (async function() {
+          const b64 = ${JSON.stringify(xlsxBase64)};
+          const binaryString = atob(b64);
+          const bytes = new Uint8Array(binaryString.length);
+          for (let i = 0; i < binaryString.length; i++) {
+            bytes[i] = binaryString.charCodeAt(i);
+          }
+          await window.__LumioApp.ensureXlsxLoaded();
+          window.__LumioApp.loadExcelBuffer(bytes.buffer, 'teste_loja.xlsx');
+          
+          const rows = document.querySelectorAll('.data-table tbody tr');
+          const tabsBar = document.getElementById('excelSheetTabsBar');
+          const tabs = document.querySelectorAll('.sheet-tab-btn');
+          
+          // Switch to second sheet
+          if (tabs.length >= 2) {
+            tabs[1].click();
+          }
+          const rowsAfterSwitch = document.querySelectorAll('.data-table tbody tr');
+          const thCidade = document.querySelector('th[data-header="Cidade"]');
+
+          return {
+            initialRowCount: rows.length,
+            tabsVisible: tabsBar && tabsBar.style.display !== 'none',
+            tabCount: tabs.length,
+            switchedRowCount: rowsAfterSwitch.length,
+            hasCidade: !!thCidade
+          };
+        })()
+      `,
+      returnByValue: true,
+      awaitPromise: true
+    });
+
+    console.log('Excel browser test results:', excelBrowserTest.result.value);
+    const eb = excelBrowserTest.result.value;
+    if (!eb || eb.initialRowCount !== 2 || !eb.tabsVisible || eb.tabCount !== 2 || !eb.hasCidade) {
+      throw new Error(`Excel browser verification failed: ${JSON.stringify(eb)}`);
+    }
+
+    console.log('✔ Headless browser test (CSV, PWA & Excel Multi-Sheet) passed successfully!');
   } finally {
     if (ws && ws.readyState === 1) {
       try { ws.close(); } catch (e) {}

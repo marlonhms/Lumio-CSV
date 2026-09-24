@@ -1923,3 +1923,78 @@ mark.search-highlight {
   color: #34d399;
 }
 
+/* =========================================================================
+   Excel Multi-Sheet Tabs Bar (Liquid Glass & Neon Edge Glow)
+   ========================================================================= */
+.excel-sheet-tabs-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 16px;
+  background: rgba(15, 23, 42, 0.7);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--glass-border);
+  overflow-x: auto;
+  scrollbar-width: thin;
+  position: relative;
+  z-index: 5;
+  animation: fadeIn 0.25s ease-out;
+}
+
+.sheet-tabs-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.76rem;
+  font-weight: 600;
+  color: var(--neon-cyan);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+}
+
+.sheet-tabs-list {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.sheet-tabs-list::-webkit-scrollbar {
+  display: none;
+}
+
+.sheet-tab-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  border-radius: var(--radius-sm);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--glass-border);
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  white-space: nowrap;
+}
+
+.sheet-tab-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text-primary);
+  border-color: rgba(255, 255, 255, 0.16);
+  transform: translateY(-1px);
+}
+
+.sheet-tab-btn.active {
+  background: linear-gradient(135deg, rgba(0, 240, 255, 0.14) 0%, rgba(168, 85, 247, 0.14) 100%);
+  color: #ffffff;
+  border-color: var(--neon-cyan);
+  box-shadow: 0 0 12px -2px rgba(0, 240, 255, 0.35);
+  font-weight: 600;
+}
+
+

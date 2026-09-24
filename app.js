@@ -37,7 +37,11 @@
     isDirty: false,
     currentThemeIndex: 0,
     themes: ['neon', 'amethyst', 'emerald', 'solar'],
-    currentEncoding: 'utf-8'
+    currentEncoding: 'utf-8',
+    isExcel: false,
+    excelWorkbook: null,
+    activeSheetName: null,
+    excelBuffer: null
   };
 
   // Embedded Sample Dataset Fallback
@@ -142,6 +146,8 @@ PED-1030;João Pedro Esteves;joao.esteves@email.com;02/03/2026;Hardware;Gabinete
     selectPageSize: document.getElementById('selectPageSize'),
     selectDelimiter: document.getElementById('selectDelimiter'),
     selectEncoding: document.getElementById('selectEncoding'),
+    excelSheetTabsBar: document.getElementById('excelSheetTabsBar'),
+    excelSheetTabsList: document.getElementById('excelSheetTabsList'),
 
     // Modals
     modalAdvFilter: document.getElementById('modalAdvFilter'),
@@ -242,28 +248,62 @@ PED-1030;João Pedro Esteves;joao.esteves@email.com;02/03/2026;Hardware;Gabinete
     elements.unsavedIndicator.style.display = dirty ? 'inline-block' : 'none';
   }
 
+  let xlsxLoadingPromise = null;
+
   /**
-   * Initialize and Load CSV Data
+   * Lazily loads SheetJS (XLSX) library on-demand
    */
-  function loadCsvContent(text, fileName = 'dataset.csv', forcedDelimiter = null, preserveDirty = false) {
-    if (!text || typeof text !== 'string') {
-      showToast('O arquivo CSV está vazio ou em formato inválido.');
-      return;
+  function ensureXlsxLoaded() {
+    if (typeof XLSX !== 'undefined') {
+      return Promise.resolve(window.XLSX);
     }
+    if (xlsxLoadingPromise) {
+      return xlsxLoadingPromise;
+    }
+    xlsxLoadingPromise = new Promise((resolve, reject) => {
+      const script = document.createElement('script');
+      script.src = 'assets/vendor/xlsx.full.min.js';
+      script.async = true;
+      script.onload = () => {
+        if (typeof XLSX !== 'undefined') {
+          resolve(window.XLSX);
+        } else {
+          xlsxLoadingPromise = null;
+          reject(new Error('Motor Excel não inicializado.'));
+        }
+      };
+      script.onerror = () => {
+        xlsxLoadingPromise = null;
+        reject(new Error('Falha ao carregar assets/vendor/xlsx.full.min.js'));
+      };
+      document.head.appendChild(script);
+    });
+    return xlsxLoadingPromise;
+  }
 
-    const tStart = performance.now();
-    state.rawText = text;
-    state.fileName = fileName;
+  // Pre-cache or preload Excel engine softly in idle time
+  if (typeof window !== 'undefined') {
+    if ('requestIdleCallback' in window) {
+      window.requestIdleCallback(() => {
+        ensureXlsxLoaded().catch(() => {});
+      }, { timeout: 4000 });
+    } else {
+      setTimeout(() => {
+        ensureXlsxLoaded().catch(() => {});
+      }, 2500);
+    }
+  }
 
-    const parseOptions = {
-      delimiter: forcedDelimiter && forcedDelimiter !== 'auto' ? forcedDelimiter : null,
-      hasHeader: true,
-      trimFields: true,
-      skipEmptyLines: true
-    };
+  function isExcelFile(name) {
+    if (!name || typeof name !== 'string') return false;
+    const ext = name.split('.').pop().toLowerCase();
+    return ['xls', 'xlsx', 'xlsm', 'xlsb', 'ods'].includes(ext);
+  }
 
-    const parsed = CsvEngine.parse(text, parseOptions);
-
+  /**
+   * Universal Dataset Loader (Used by CSV, TSV and Excel sheets)
+   */
+  function loadParsedDataset(parsed, fileName, sheetName = null, tStart = null, preserveDirty = false) {
     if (!parsed.headers || parsed.headers.length === 0) {
       showToast('Não foi possível identificar colunas neste arquivo.');
       return;
@@ -276,7 +316,11 @@ PED-1030;João Pedro Esteves;joao.esteves@email.com;02/03/2026;Hardware;Gabinete
     state.selectedRowIds.clear();
 
     // Sync delimiter dropdown
-    elements.selectDelimiter.value = parsed.meta.delimiter;
+    if (parsed.meta && parsed.meta.delimiter) {
+      elements.selectDelimiter.value = parsed.meta.delimiter;
+    }
+    elements.selectDelimiter.disabled = state.isExcel;
+    elements.selectEncoding.disabled = state.isExcel;
 
     // Reset view controls if fresh load
     if (!preserveDirty) {
@@ -288,7 +332,6 @@ PED-1030;João Pedro Esteves;joao.esteves@email.com;02/03/2026;Hardware;Gabinete
       state.currentPage = 1;
       state.columnWidths = {};
       state.columnAlignments = {};
-      // Calculate intelligent initial auto-fit widths for all visible columns
       state.visibleHeaders.forEach(h => {
         state.columnWidths[h] = calculateIdealColumnWidth(h);
       });
@@ -299,7 +342,8 @@ PED-1030;João Pedro Esteves;joao.esteves@email.com;02/03/2026;Hardware;Gabinete
 
     // File info badge
     elements.fileInfoBadge.style.display = 'flex';
-    elements.fileInfoName.textContent = fileName;
+    const displayName = sheetName ? `${fileName} [${sheetName}]` : fileName;
+    elements.fileInfoName.textContent = displayName;
     updateFileDetailsBadge();
 
     // Switch view from dropzone to table
@@ -315,9 +359,147 @@ PED-1030;João Pedro Esteves;joao.esteves@email.com;02/03/2026;Hardware;Gabinete
     renderTableBody();
     updateMetrics();
 
-    const tEnd = performance.now();
-    const ms = Math.round(tEnd - tStart);
-    showToast(`Carregado com sucesso! ${state.data.length.toLocaleString('pt-BR')} registros analisados em ${ms}ms.`);
+    const ms = tStart ? Math.round(performance.now() - tStart) : 0;
+    const countStr = state.data.length.toLocaleString('pt-BR');
+    showToast(`Carregado com sucesso! ${countStr} registros analisados${ms ? ' em ' + ms + 'ms.' : '.'}`);
+  }
+
+  /**
+   * Initialize and Load CSV Data
+   */
+  function loadCsvContent(text, fileName = 'dataset.csv', forcedDelimiter = null, preserveDirty = false) {
+    if (!text || typeof text !== 'string') {
+      showToast('O arquivo CSV está vazio ou em formato inválido.');
+      return;
+    }
+
+    const tStart = performance.now();
+    state.rawText = text;
+    state.fileName = fileName;
+    state.isExcel = false;
+    state.excelWorkbook = null;
+    state.activeSheetName = null;
+    if (elements.excelSheetTabsBar) {
+      elements.excelSheetTabsBar.style.display = 'none';
+    }
+
+    const parseOptions = {
+      delimiter: forcedDelimiter && forcedDelimiter !== 'auto' ? forcedDelimiter : null,
+      hasHeader: true,
+      trimFields: true,
+      skipEmptyLines: true
+    };
+
+    const parsed = CsvEngine.parse(text, parseOptions);
+    loadParsedDataset(parsed, fileName, null, tStart, preserveDirty);
+  }
+
+  /**
+   * Render Excel Sheet Tabs
+   */
+  function renderSheetTabs(sheetNames, activeSheet) {
+    if (!elements.excelSheetTabsBar) return;
+    if (!sheetNames || sheetNames.length <= 1) {
+      elements.excelSheetTabsBar.style.display = 'none';
+      return;
+    }
+
+    elements.excelSheetTabsBar.style.display = 'flex';
+    elements.excelSheetTabsList.innerHTML = '';
+
+    sheetNames.forEach(name => {
+      const btn = document.createElement('button');
+      btn.className = `sheet-tab-btn ${name === activeSheet ? 'active' : ''}`;
+      btn.innerHTML = `
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+        </svg>
+        <span>${escapeHtml(name)}</span>
+      `;
+      btn.title = `Alternar para a aba "${name}"`;
+      btn.addEventListener('click', () => {
+        if (name !== state.activeSheetName) {
+          switchExcelSheet(name);
+        }
+      });
+      elements.excelSheetTabsList.appendChild(btn);
+    });
+  }
+
+  /**
+   * Switch Active Excel Sheet
+   */
+  function switchExcelSheet(sheetName) {
+    if (!state.excelWorkbook) return;
+    const worksheet = state.excelWorkbook.Sheets[sheetName];
+    if (!worksheet) return;
+
+    state.activeSheetName = sheetName;
+    renderSheetTabs(state.excelWorkbook.SheetNames, sheetName);
+
+    const aoa = window.XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: '' });
+    const parsed = CsvEngine.fromAOA(aoa);
+
+    const tStart = performance.now();
+    loadParsedDataset(parsed, state.fileName, sheetName, tStart, false);
+    showToast(`Aba alternada para "${sheetName}".`);
+  }
+
+  /**
+   * Load Excel Workbook from ArrayBuffer
+   */
+  function loadExcelBuffer(buffer, fileName, targetSheetName = null) {
+    const tStart = performance.now();
+    state.fileName = fileName;
+    state.rawBuffer = buffer;
+    state.isExcel = true;
+
+    try {
+      const workbook = window.XLSX.read(buffer, { type: 'array', cellDates: true });
+      state.excelWorkbook = workbook;
+      state.excelBuffer = buffer;
+
+      const sheetNames = workbook.SheetNames;
+      if (!sheetNames || sheetNames.length === 0) {
+        showToast('A planilha Excel não contém nenhuma aba visível.');
+        return;
+      }
+
+      const activeSheet = targetSheetName && sheetNames.includes(targetSheetName) ? targetSheetName : sheetNames[0];
+      state.activeSheetName = activeSheet;
+
+      renderSheetTabs(sheetNames, activeSheet);
+
+      const worksheet = workbook.Sheets[activeSheet];
+      const aoa = window.XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: '' });
+      const parsed = CsvEngine.fromAOA(aoa);
+
+      loadParsedDataset(parsed, fileName, activeSheet, tStart, false);
+    } catch (err) {
+      console.error(err);
+      showToast('Erro ao processar planilha Excel: ' + err.message);
+    }
+  }
+
+  /**
+   * Load Excel File object
+   */
+  function loadExcelFile(file) {
+    showToast('Carregando planilha Excel...');
+    ensureXlsxLoaded()
+      .then(() => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          loadExcelBuffer(e.target.result, file.name);
+        };
+        reader.onerror = () => {
+          showToast('Erro ao ler arquivo Excel do disco.');
+        };
+        reader.readAsArrayBuffer(file);
+      })
+      .catch((err) => {
+        showToast('Erro ao carregar motor Excel: ' + err.message);
+      });
   }
 
   function updateFileDetailsBadge() {
@@ -1905,13 +2087,21 @@ PED-1030;João Pedro Esteves;joao.esteves@email.com;02/03/2026;Hardware;Gabinete
    * Setup Event Listeners
    */
   function initEventListeners() {
+    function handleFileSelected(file) {
+      if (!file) return;
+      state.file = file;
+      if (isExcelFile(file.name)) {
+        loadExcelFile(file);
+      } else {
+        readFileWithEncoding(file, state.currentEncoding);
+      }
+    }
+
     // File Input change
     elements.fileInput.addEventListener('change', (e) => {
       const file = e.target.files[0];
       if (!file) return;
-
-      state.file = file;
-      readFileWithEncoding(file, state.currentEncoding);
+      handleFileSelected(file);
     });
 
     function readFileWithEncoding(file, encoding) {
@@ -1937,7 +2127,7 @@ PED-1030;João Pedro Esteves;joao.esteves@email.com;02/03/2026;Hardware;Gabinete
       const encoding = e.target.value;
       state.currentEncoding = encoding;
 
-      if (state.rawBuffer) {
+      if (state.rawBuffer && !state.isExcel) {
         try {
           const decoder = new TextDecoder(encoding);
           const decodedText = decoder.decode(state.rawBuffer);
@@ -1974,7 +2164,11 @@ PED-1030;João Pedro Esteves;joao.esteves@email.com;02/03/2026;Hardware;Gabinete
     // Quick Save button & Ctrl+S
     const handleQuickSave = () => {
       if (state.data.length === 0) return;
-      exportDataToFile(false, 'csv_comma');
+      if (state.isExcel) {
+        exportDataToFile(false, 'xlsx');
+      } else {
+        exportDataToFile(false, 'csv_comma');
+      }
       markDirty(false);
     };
 
@@ -1999,8 +2193,7 @@ PED-1030;João Pedro Esteves;joao.esteves@email.com;02/03/2026;Hardware;Gabinete
         e.preventDefault();
         elements.dropzoneContainer.classList.remove('drag-over');
         const file = e.dataTransfer.files[0];
-        state.file = file;
-        readFileWithEncoding(file, state.currentEncoding);
+        handleFileSelected(file);
       }
     });
 
@@ -2671,6 +2864,41 @@ PED-1030;João Pedro Esteves;joao.esteves@email.com;02/03/2026;Hardware;Gabinete
     let fileName = state.fileName.replace(/\.[^/.]+$/, '') || 'dataset';
     let mimeType = 'text/plain';
 
+    if (format === 'xlsx') {
+      ensureXlsxLoaded().then(() => {
+        const sheetName = (state.activeSheetName || 'Dados').slice(0, 31);
+        const excelBuf = CsvEngine.toExcel(headersToExport, dataToExport, {
+          visibleHeaders: headersToExport,
+          sheetName,
+          xlsx: window.XLSX
+        });
+
+        if (copyOnly) {
+          const tsvText = CsvEngine.toCSV(headersToExport, dataToExport, { delimiter: '\t' });
+          navigator.clipboard.writeText(tsvText).then(() => {
+            showToast('Dados copiados para a área de transferência (compatível com colar no Excel)!');
+            closeModal('modalExport');
+          });
+          return;
+        }
+
+        const blob = new Blob([excelBuf], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.setAttribute('href', url);
+        link.setAttribute('download', fileName + '_export.xlsx');
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+        showToast(`Planilha "${fileName}_export.xlsx" baixada com sucesso!`);
+        closeModal('modalExport');
+      }).catch(err => {
+        showToast('Erro ao exportar Excel: ' + err.message);
+      });
+      return;
+    }
+
     if (format === 'csv_comma') {
       outputText = CsvEngine.toCSV(headersToExport, dataToExport, { delimiter: ',' });
       fileName += '_export.csv';
@@ -2819,7 +3047,11 @@ PED-1030;João Pedro Esteves;joao.esteves@email.com;02/03/2026;Hardware;Gabinete
             const file = await fileHandle.getFile();
             if (file) {
               state.file = file;
-              readFileWithEncoding(file, state.currentEncoding);
+              if (isExcelFile(file.name)) {
+                loadExcelFile(file);
+              } else {
+                readFileWithEncoding(file, state.currentEncoding);
+              }
             }
           } catch (err) {
             console.error('Erro ao abrir arquivo do manipulador do sistema:', err);
@@ -2870,6 +3102,16 @@ PED-1030;João Pedro Esteves;joao.esteves@email.com;02/03/2026;Hardware;Gabinete
       }
     } catch (e) {}
   }
+
+  // Global accessor for automated verification & integrations
+  window.__LumioApp = {
+    state,
+    elements,
+    ensureXlsxLoaded,
+    loadExcelBuffer,
+    loadCsvContent,
+    loadParsedDataset
+  };
 
   // Self Initialization on DOM Load
   document.addEventListener('DOMContentLoaded', () => {

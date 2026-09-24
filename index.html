@@ -29,7 +29,7 @@
   </div>
 
   <!-- Hidden File Input -->
-  <input type="file" id="fileInput" accept=".csv,.tsv,.txt" style="display: none;">
+  <input type="file" id="fileInput" accept=".csv,.tsv,.txt,.xls,.xlsx,.xlsm,.xlsb,.ods" style="display: none;">
 
   <!-- Main Application Container -->
   <div class="app-container">
@@ -269,10 +269,10 @@
             <polyline points="10 9 9 9 8 9"></polyline>
           </svg>
         </div>
-        <h2 class="dropzone-title">Arraste seu arquivo CSV aqui</h2>
+        <h2 class="dropzone-title">Arraste seu arquivo CSV, TSV ou Excel aqui</h2>
         <p class="dropzone-desc">
-          Visualizador e editor ultrarrápido, intuitivo e 100% privado no seu navegador.
-          Abra, filtre, edite células, adicione linhas/colunas e exporte sem nunca precisar de programas pesados.
+          Visualizador e editor ultrarrápido, fluido e 100% privado no seu navegador.
+          Suporta CSV, TSV e planilhas Excel (.xlsx, .xls) com seleção de abas, filtros inteligentes e edição inline sem depender de programas pesados.
         </p>
         <div class="dropzone-actions">
           <button id="btnDropzoneSelect" class="btn btn-primary">
@@ -327,6 +327,19 @@
           </div>
         </div>
 
+        <!-- Excel Multi-Sheet Tabs Bar -->
+        <div id="excelSheetTabsBar" class="excel-sheet-tabs-bar" style="display: none;">
+          <div class="sheet-tabs-label">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+              <line x1="3" y1="9" x2="21" y2="9"></line>
+              <line x1="9" y1="21" x2="9" y2="9"></line>
+            </svg>
+            <span>Abas:</span>
+          </div>
+          <div id="excelSheetTabsList" class="sheet-tabs-list"></div>
+        </div>
+
         <div id="tableScrollArea" class="table-scroll-area">
           <table id="dataTable" class="data-table">
             <thead id="tableHead"></thead>
@@ -361,6 +374,7 @@
             <span style="margin-left: 8px;">Delimitador:</span>
             <select id="selectDelimiter" class="glass-select" title="Alterar delimitador do CSV">
               <option value="auto">Auto</option>
+              <option value="Excel" style="display: none;">Excel (Nativo)</option>
               <option value=",">Vírgula (,)</option>
               <option value=";">Ponto e vírgula (;)</option>
               <option value="&#9;">Tabulação (\t)</option>
@@ -587,6 +601,7 @@
         <div>
           <label style="display: block; font-size: 0.78rem; color: var(--text-secondary); margin-bottom: 6px;">Formato de Exportação:</label>
           <select id="selectExportFormat" class="glass-select" style="width: 100%;">
+            <option value="xlsx">Planilha Excel (.xlsx)</option>
             <option value="csv_comma">CSV Padrão (Delimitador Vírgula ,)</option>
             <option value="csv_semi">CSV Brasileiro / Excel (Delimitador Ponto e Vírgula ;)</option>
             <option value="json">JSON (Estruturado em Array de Objetos)</option>

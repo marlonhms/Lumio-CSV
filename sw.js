@@ -14,7 +14,8 @@ const STATIC_ASSETS = [
   './assets/icons/icon-192.png',
   './assets/icons/icon-512.png',
   './assets/icons/icon-512-maskable.png',
-  './assets/icons/icon-64.png'
+  './assets/icons/icon-64.png',
+  './assets/vendor/xlsx.full.min.js'
 ];
 
 // Install: pre-cache static assets

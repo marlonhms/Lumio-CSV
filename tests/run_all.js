@@ -8,6 +8,7 @@ const testSuites = [
   'test_column_resizing_and_autofit.js',
   'test_app_deep_verification.js',
   'test_pwa_and_structure.js',
+  'test_excel_support.js',
   'test_in_browser.js'
 ];
 
