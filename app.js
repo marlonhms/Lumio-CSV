@@ -111,7 +111,6 @@ PED-1030;João Pedro Esteves;joao.esteves@email.com;02/03/2026;Hardware;Gabinete
 
     btnAutoFitAll: document.getElementById('btnAutoFitAll'),
     btnAddRow: document.getElementById('btnAddRow'),
-    btnAddColumnModalTrigger: document.getElementById('btnAddColumnModalTrigger'),
     btnToggleQuickFilters: document.getElementById('btnToggleQuickFilters'),
     btnOpenAdvFilter: document.getElementById('btnOpenAdvFilter'),
     activeFilterBadge: document.getElementById('activeFilterBadge'),
@@ -162,12 +161,6 @@ PED-1030;João Pedro Esteves;joao.esteves@email.com;02/03/2026;Hardware;Gabinete
     btnDeselectAllCols: document.getElementById('btnDeselectAllCols'),
     btnModalAutoFitAll: document.getElementById('btnModalAutoFitAll'),
     btnModalResetCols: document.getElementById('btnModalResetCols'),
-    btnOpenNewColFromManager: document.getElementById('btnOpenNewColFromManager'),
-
-    modalAddColumn: document.getElementById('modalAddColumn'),
-    inputNewColName: document.getElementById('inputNewColName'),
-    inputNewColDefault: document.getElementById('inputNewColDefault'),
-    btnConfirmAddColumn: document.getElementById('btnConfirmAddColumn'),
 
     modalStats: document.getElementById('modalStats'),
     selectStatsColumn: document.getElementById('selectStatsColumn'),
@@ -820,12 +813,6 @@ PED-1030;João Pedro Esteves;joao.esteves@email.com;02/03/2026;Hardware;Gabinete
                 <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>
               </svg>
             </button>
-            <button class="th-action-btn" data-rename="${escapeHtml(header)}" title="Renomear coluna">
-              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M12 20h9"></path>
-                <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
-              </svg>
-            </button>
             <button class="th-action-btn" data-stats="${escapeHtml(header)}" title="Estatísticas e Perfil desta coluna">
               <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <line x1="18" y1="20" x2="18" y2="10"></line>
@@ -1073,15 +1060,6 @@ PED-1030;João Pedro Esteves;joao.esteves@email.com;02/03/2026;Hardware;Gabinete
         });
       }
 
-      // Rename column
-      const btnRename = th.querySelector('[data-rename]');
-      if (btnRename) {
-        btnRename.addEventListener('click', (e) => {
-          e.stopPropagation();
-          renameColumnPrompt(header);
-        });
-      }
-
       // Stats profile
       const btnStats = th.querySelector('[data-stats]');
       if (btnStats) {
@@ -1261,63 +1239,6 @@ PED-1030;João Pedro Esteves;joao.esteves@email.com;02/03/2026;Hardware;Gabinete
     renderTableHeader();
     renderTableBody();
     updatePaginationControls();
-  }
-
-  /**
-   * Prompt to rename a column
-   */
-  function renameColumnPrompt(oldCol) {
-    const newName = prompt(`Digite o novo nome para a coluna "${oldCol}":`, oldCol);
-    if (!newName || newName.trim() === '' || newName.trim() === oldCol) return;
-
-    const trimmed = newName.trim();
-    if (state.headers.includes(trimmed)) {
-      showToast(`Uma coluna com o nome "${trimmed}" já existe.`);
-      return;
-    }
-
-    // Update in headers and visibleHeaders
-    const hIdx = state.headers.indexOf(oldCol);
-    if (hIdx !== -1) state.headers[hIdx] = trimmed;
-
-    const vIdx = state.visibleHeaders.indexOf(oldCol);
-    if (vIdx !== -1) state.visibleHeaders[vIdx] = trimmed;
-
-    // Update key in all records
-    state.data.forEach(row => {
-      row[trimmed] = row[oldCol];
-      delete row[oldCol];
-    });
-
-    // Update inferredTypes & filters
-    state.inferredTypes[trimmed] = state.inferredTypes[oldCol];
-    delete state.inferredTypes[oldCol];
-
-    if (state.columnFilters[oldCol] !== undefined) {
-      state.columnFilters[trimmed] = state.columnFilters[oldCol];
-      delete state.columnFilters[oldCol];
-    }
-
-    if (state.columnWidths[oldCol] !== undefined) {
-      state.columnWidths[trimmed] = state.columnWidths[oldCol];
-      delete state.columnWidths[oldCol];
-    }
-
-    if (state.columnAlignments[oldCol] !== undefined) {
-      state.columnAlignments[trimmed] = state.columnAlignments[oldCol];
-      delete state.columnAlignments[oldCol];
-    }
-
-    if (state.sortColumn === oldCol) {
-      state.sortColumn = trimmed;
-    }
-
-    markDirty(true);
-    recomputeFilteredData();
-    renderTableHeader();
-    renderTableBody();
-    updateMetrics();
-    showToast(`Coluna renomeada para "${trimmed}".`);
   }
 
   /**
@@ -1765,39 +1686,6 @@ PED-1030;João Pedro Esteves;joao.esteves@email.com;02/03/2026;Hardware;Gabinete
   }
 
   /**
-   * Add a new column
-   */
-  function createNewColumn(colName, defaultValue = '') {
-    if (!colName || colName.trim() === '') {
-      showToast('Por favor, informe um nome válido para a coluna.');
-      return;
-    }
-
-    const trimmed = colName.trim();
-    if (state.headers.includes(trimmed)) {
-      showToast(`A coluna "${trimmed}" já existe.`);
-      return;
-    }
-
-    state.headers.push(trimmed);
-    state.visibleHeaders.push(trimmed);
-    state.inferredTypes[trimmed] = defaultValue ? 'text' : 'text';
-
-    state.data.forEach(row => {
-      row[trimmed] = defaultValue;
-    });
-
-    markDirty(true);
-    updateFileDetailsBadge();
-    recomputeFilteredData();
-    renderTableHeader();
-    renderTableBody();
-    updateMetrics();
-    closeModal('modalAddColumn');
-    showToast(`Coluna "${trimmed}" criada com sucesso!`);
-  }
-
-  /**
    * Update Bottom Pagination Summary & Buttons
    */
   function updatePaginationControls() {
@@ -2224,23 +2112,6 @@ PED-1030;João Pedro Esteves;joao.esteves@email.com;02/03/2026;Hardware;Gabinete
     }
 
     elements.btnAddRow.addEventListener('click', addNewRow);
-
-    elements.btnAddColumnModalTrigger.addEventListener('click', () => {
-      elements.inputNewColName.value = '';
-      elements.inputNewColDefault.value = '';
-      openModal('modalAddColumn');
-    });
-
-    elements.btnConfirmAddColumn.addEventListener('click', () => {
-      createNewColumn(elements.inputNewColName.value, elements.inputNewColDefault.value);
-    });
-
-    elements.btnOpenNewColFromManager.addEventListener('click', () => {
-      closeModal('modalColumns');
-      elements.inputNewColName.value = '';
-      elements.inputNewColDefault.value = '';
-      openModal('modalAddColumn');
-    });
 
     elements.btnToggleQuickFilters.addEventListener('click', () => {
       state.showQuickFilters = !state.showQuickFilters;
