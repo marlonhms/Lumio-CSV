@@ -81,6 +81,8 @@ PED-1030;João Pedro Esteves;joao.esteves@email.com;02/03/2026;Hardware;Gabinete
     btnLoadSample: document.getElementById('btnLoadSample'),
     btnQuickSave: document.getElementById('btnQuickSave'),
     btnExport: document.getElementById('btnExport'),
+    btnInstallApp: document.getElementById('btnInstallApp'),
+    btnTriggerPwaInstall: document.getElementById('btnTriggerPwaInstall'),
     btnThemeToggle: document.getElementById('btnThemeToggle'),
     fileInfoBadge: document.getElementById('fileInfoBadge'),
     fileInfoName: document.getElementById('fileInfoName'),
@@ -2711,9 +2713,99 @@ PED-1030;João Pedro Esteves;joao.esteves@email.com;02/03/2026;Hardware;Gabinete
     }
   }
 
+  // =========================================================================
+  // Progressive Web App (PWA) & Native Desktop Integration
+  // =========================================================================
+  let deferredInstallPrompt = null;
+
+  function initPwaAndIntegration() {
+    // 1. Service Worker registration for 100% offline access
+    if ('serviceWorker' in navigator && (window.location.protocol === 'http:' || window.location.protocol === 'https:')) {
+      navigator.serviceWorker.register('./sw.js')
+        .then((reg) => {
+          console.debug('Lumio CSV Service Worker registered successfully:', reg.scope);
+        })
+        .catch((err) => {
+          console.debug('Service Worker registration note:', err);
+        });
+    }
+
+    // 2. Capture native PWA install prompt
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredInstallPrompt = e;
+      if (elements.btnInstallApp) {
+        elements.btnInstallApp.classList.add('has-native-prompt');
+      }
+    });
+
+    window.addEventListener('appinstalled', () => {
+      deferredInstallPrompt = null;
+      showToast('Lumio CSV instalado com sucesso como aplicativo nativo!');
+    });
+
+    // 3. PWA File Handling API (Allows opening CSV/TSV/TXT files directly from Windows Explorer)
+    if ('launchQueue' in window && window.LaunchParams && 'files' in window.LaunchParams.prototype) {
+      window.launchQueue.setConsumer(async (launchParams) => {
+        if (launchParams.files && launchParams.files.length > 0) {
+          try {
+            const fileHandle = launchParams.files[0];
+            const file = await fileHandle.getFile();
+            if (file) {
+              state.file = file;
+              readFileWithEncoding(file, state.currentEncoding);
+            }
+          } catch (err) {
+            console.error('Erro ao abrir arquivo do manipulador do sistema:', err);
+          }
+        }
+      });
+    }
+
+    // 4. Install App Button Handlers
+    if (elements.btnInstallApp) {
+      elements.btnInstallApp.addEventListener('click', async () => {
+        if (deferredInstallPrompt) {
+          deferredInstallPrompt.prompt();
+          const choice = await deferredInstallPrompt.userChoice;
+          if (choice.outcome === 'accepted') {
+            showToast('Instalando Lumio CSV...');
+          }
+          deferredInstallPrompt = null;
+        } else {
+          openModal('modalInstallApp');
+        }
+      });
+    }
+
+    if (elements.btnTriggerPwaInstall) {
+      elements.btnTriggerPwaInstall.addEventListener('click', async () => {
+        if (deferredInstallPrompt) {
+          closeModal('modalInstallApp');
+          deferredInstallPrompt.prompt();
+          deferredInstallPrompt = null;
+        } else {
+          showToast('Para instalar como app no navegador, inicie via servidor local (scripts/iniciar_servidor_local.bat) ou use o atalho da Área de Trabalho!');
+        }
+      });
+    }
+
+    // 5. Query Parameter Support (?sample=true)
+    try {
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get('sample') === 'true') {
+        fetch('sample_data.csv')
+          .then(res => res.text())
+          .then(text => loadCsvContent(text, 'vendas_tech_sample.csv'))
+          .catch(() => loadCsvContent(EMBEDDED_SAMPLE_CSV, 'vendas_tech_sample.csv'));
+      }
+    } catch (e) {}
+  }
+
   // Self Initialization on DOM Load
   document.addEventListener('DOMContentLoaded', () => {
     initEventListeners();
+    initPwaAndIntegration();
   });
 
 })();

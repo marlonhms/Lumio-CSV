@@ -1,12 +1,13 @@
 const assert = require('assert');
 const fs = require('fs');
-const CsvEngine = require('./csv-engine.js');
+const path = require('path');
+const CsvEngine = require(path.join(__dirname, '../csv-engine.js'));
 
 console.log('=== RUNNING VERIFICATION FOR NEW FEATURES & PERFORMANCE ===');
 
 // Test 1: Verify 'PRO LIQUID' removal from header
 console.log('Test 1: Checking header text for PRO LIQUID...');
-const htmlContent = fs.readFileSync('./index.html', 'utf8');
+const htmlContent = fs.readFileSync(path.join(__dirname, '../index.html'), 'utf8');
 assert.ok(!htmlContent.includes('PRO LIQUID'), 'index.html should not contain "PRO LIQUID"');
 assert.ok(!htmlContent.includes('proliquid'), 'index.html should not contain "proliquid"');
 assert.ok(htmlContent.includes('Lumio <span>CSV</span>'), 'Brand title should be intact without PRO LIQUID');
@@ -26,7 +27,7 @@ assert.ok(controlsIndex !== -1, 'toolbar-controls must exist');
 assert.ok(metricsIndex < searchIndex, 'metrics-strip should precede search-box-wrapper');
 assert.ok(searchIndex < controlsIndex, 'search-box-wrapper should precede toolbar-controls');
 
-const cssContent = fs.readFileSync('./style.css', 'utf8');
+const cssContent = fs.readFileSync(path.join(__dirname, '../style.css'), 'utf8');
 assert.ok(cssContent.includes('.search-box-wrapper'), 'CSS should style .search-box-wrapper');
 assert.ok(cssContent.includes('margin: 0 auto;'), 'Search box wrapper should have margin: 0 auto for centering');
 assert.ok(cssContent.includes('.fps-pill'), 'CSS should style .fps-pill');
@@ -37,7 +38,6 @@ console.log('✔ Smart search bar is centered and CSS classes exist');
 // Test 3: Column auto-fit sizing logic simulation
 console.log('Test 3: Testing Column Auto-Fit calculation...');
 function mockCalculateIdealWidth(header, type, sampleRows) {
-  // Approximate width calculation matching app.js logic
   const minHeaderWidth = header.length * 8.5 + 145;
   let maxCellLength = 0;
   for (const row of sampleRows) {

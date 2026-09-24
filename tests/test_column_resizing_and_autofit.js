@@ -1,11 +1,12 @@
 const assert = require('assert');
 const fs = require('fs');
+const path = require('path');
 
 console.log('=== RUNNING VERIFICATION FOR COLUMN RESIZING AND AUTO-FIT ===');
 
 // 1. Verify CSS rules
 console.log('Test 1: Verifying style.css table layout and resizer rules...');
-const styleCss = fs.readFileSync('./style.css', 'utf8');
+const styleCss = fs.readFileSync(path.join(__dirname, '../style.css'), 'utf8');
 
 // Check that .data-table does NOT have min-width: 100% which was forcing small columns to stretch
 const dataTableMatch = styleCss.match(/\.data-table\s*\{([\s\S]*?)\}/);
@@ -31,7 +32,7 @@ console.log('✔ CSS layout rules verified: no min-width: 100%, enhanced .col-re
 
 // 2. Verify app.js implementation
 console.log('Test 2: Verifying app.js column resizing, autofit & table synchronization...');
-const appJs = fs.readFileSync('./app.js', 'utf8');
+const appJs = fs.readFileSync(path.join(__dirname, '../app.js'), 'utf8');
 
 // Check that app.js synchronizes elements.dataTable.style.width
 assert.ok(appJs.includes('elements.dataTable.style.width = totalTableWidth + \'px\';'), 'app.js must synchronize explicit table width on render');
@@ -49,7 +50,6 @@ console.log('Test 3: Testing optimal width calculation on user test data (admini
 
 // Helper mocking getTextWidth
 function getTextWidthMock(text, font) {
-  // Approximate character width in Inter / JetBrains Mono
   if (font && font.includes('JetBrains Mono')) {
     return String(text).length * 8.0;
   }
@@ -102,7 +102,6 @@ const widthHora = calculateIdealColumnWidthMock('horaMovimento', 'text', userRow
 
 console.log(`Calculated optimal widths -> administradora: ${widthAdm}px, nsu: ${widthNsu}px, dataMovimento: ${widthData}px, horaMovimento: ${widthHora}px`);
 
-// Verify that administradora does NOT blow up to 240px+ and does NOT crush the title below 140px
 assert.ok(widthAdm <= 185, `administradora with 3-digit numbers must be compact (got ${widthAdm}px)`);
 assert.ok(widthAdm >= 140, `administradora must satisfy readable width for title (got ${widthAdm}px)`);
 assert.ok(widthNsu <= 105, `nsu must be compact (got ${widthNsu}px)`);
@@ -113,7 +112,6 @@ assert.ok(widthData >= 140, `dataMovimento must comfortably fit date (got ${widt
 console.log('Test 4: Verifying total table width with few columns...');
 const totalWidth = 44 + 58 + 90 + widthAdm + widthNsu + widthData + widthHora;
 console.log(`Total table width for 4 columns: ${totalWidth}px`);
-// With 4 columns, total width is ~800px, which sits cleanly in container without being stretched to 1920px!
 assert.ok(totalWidth < 850, `Table with 4 compact columns must not artificially expand (got ${totalWidth}px)`);
 
 console.log('✔ All column resizing, auto-fit, and table width checks passed successfully!');

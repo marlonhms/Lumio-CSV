@@ -1,0 +1,29 @@
+{
+  "name": "lumio-csv",
+  "version": "1.1.0",
+  "description": "Visualizador & Editor de CSV Ultraleve, Inteligente e 100% Offline com design Liquid Glass",
+  "main": "index.html",
+  "scripts": {
+    "start": "node scripts/serve.js",
+    "test": "node tests/run_all.js",
+    "shortcut": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/criar_atalho_desktop.ps1",
+    "build:icons": "node scripts/build_icons.js"
+  },
+  "keywords": [
+    "csv",
+    "tsv",
+    "viewer",
+    "editor",
+    "pwa",
+    "offline",
+    "liquid-glass",
+    "table",
+    "grid"
+  ],
+  "author": "Marlon Henrique Serpa",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/marlonhms/Lumio-CSV.git"
+  }
+}

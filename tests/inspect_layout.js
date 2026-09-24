@@ -1,16 +1,17 @@
 const fs = require('fs');
-const { spawn } = require('child_process');
-const http = require('http');
+const path = require('path');
 
-// Read index.html and make toolbarPanel visible with dummy data
-let html = fs.readFileSync('index.html', 'utf8');
+const ROOT = path.join(__dirname, '..');
+const htmlPath = path.join(ROOT, 'index.html');
+const outPath = path.join(ROOT, 'test_render.html');
+
+let html = fs.readFileSync(htmlPath, 'utf8');
 html = html.replace('id="toolbarPanel" class="toolbar-panel glass-panel" style="display: none;"', 'id="toolbarPanel" class="toolbar-panel glass-panel" style="display: grid;"');
 html = html.replace('<strong id="metricTotalRows">0</strong>', '<strong id="metricTotalRows">834</strong>');
 html = html.replace('<strong id="metricFilteredRows">0</strong>', '<strong id="metricFilteredRows">834</strong>');
 html = html.replace('<strong id="metricTotalCols">0</strong>', '<strong id="metricTotalCols">13/13</strong>');
 html = html.replace('<strong id="metricEmptyCells">0%</strong>', '<strong id="metricEmptyCells">0%</strong>');
 
-// Add inline script to measure bounding boxes and dump to console
 const scriptToInject = `
 <script>
 window.addEventListener('load', () => {
@@ -37,5 +38,5 @@ window.addEventListener('load', () => {
 `;
 
 html = html.replace('</body>', scriptToInject + '</body>');
-fs.writeFileSync('test_render.html', html);
+fs.writeFileSync(outPath, html);
 console.log('test_render.html created.');

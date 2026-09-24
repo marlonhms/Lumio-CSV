@@ -1,12 +1,13 @@
 const assert = require('assert');
 const fs = require('fs');
-const CsvEngine = require('./csv-engine.js');
+const path = require('path');
+const CsvEngine = require(path.join(__dirname, '../csv-engine.js'));
 
 console.log('=== RUNNING DEEP VERIFICATION SUITE FOR LUMIO CSV ===');
 
 // 1. Verify 'proliquid' is completely eliminated from markup
 console.log('Test 1: Verifying PRO LIQUID elimination...');
-const indexHtml = fs.readFileSync('./index.html', 'utf8');
+const indexHtml = fs.readFileSync(path.join(__dirname, '../index.html'), 'utf8');
 assert.ok(!indexHtml.includes('PRO LIQUID'), 'index.html must not contain PRO LIQUID');
 assert.ok(!indexHtml.includes('proliquid'), 'index.html must not contain proliquid');
 assert.ok(!indexHtml.includes('brand-badge'), 'index.html must not contain the obsolete brand-badge');
@@ -15,7 +16,7 @@ console.log('✔ No proliquid branding found anywhere in index.html');
 
 // 2. Verify Toolbar Grid Centering
 console.log('Test 2: Verifying true centered search bar layout...');
-const styleCss = fs.readFileSync('./style.css', 'utf8');
+const styleCss = fs.readFileSync(path.join(__dirname, '../style.css'), 'utf8');
 assert.ok(styleCss.includes('display: grid;'), 'Toolbar panel must use CSS Grid');
 assert.ok(styleCss.includes('grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);'), 'Toolbar panel must have symmetrical 1fr side tracks');
 assert.ok(styleCss.includes('justify-self: center;'), 'Search box wrapper must have justify-self: center');
@@ -49,7 +50,7 @@ console.log('✔ Sticky headers and scrolling layout are completely clean withou
 
 // 4. Verify Column Manager controls (Expand, Shrink, Auto-Fit, Center)
 console.log('Test 4: Verifying Column Manager controls in app.js and index.html...');
-const appJs = fs.readFileSync('./app.js', 'utf8');
+const appJs = fs.readFileSync(path.join(__dirname, '../app.js'), 'utf8');
 assert.ok(appJs.includes('function expandColumn('), 'app.js must define expandColumn');
 assert.ok(appJs.includes('function shrinkColumn('), 'app.js must define shrinkColumn');
 assert.ok(appJs.includes('function autoFitColumn('), 'app.js must define autoFitColumn');
@@ -71,7 +72,6 @@ console.log('✔ Drag-and-drop sort click suppression and colgroup management ve
 // 6. Test actual column math and resizing logic
 console.log('Test 6: Testing expand, shrink, auto-fit, and moveColumn behaviors...');
 
-// Simulate app.js state and column functions
 const state = {
   headers: ['ID', 'Cliente', 'Produto', 'Preco', 'Status'],
   visibleHeaders: ['ID', 'Cliente', 'Produto', 'Preco', 'Status'],
@@ -84,7 +84,6 @@ const state = {
   ]
 };
 
-// Test initial calculation
 function calculateIdealWidthSim(h) {
   const minHeaderWidth = h.length * 8 + 124;
   let maxCell = 0;
@@ -96,7 +95,6 @@ function calculateIdealWidthSim(h) {
   return Math.min(650, Math.max(80, Math.ceil(Math.max(minHeaderWidth, needed))));
 }
 
-// Auto fit all
 state.visibleHeaders.forEach(h => {
   state.columnWidths[h] = calculateIdealWidthSim(h);
 });
@@ -140,5 +138,4 @@ moveColumnSim('Produto', 'ID', true);
 assert.deepStrictEqual(state.visibleHeaders, ['Produto', 'ID', 'Cliente', 'Preco', 'Status'], 'Produto should be first');
 
 console.log('✔ All column manipulation logic passed with full accuracy');
-
 console.log('=== DEEP VERIFICATION COMPLETE: ALL CHECKS PASSED SUCCESSFULLY! ===');

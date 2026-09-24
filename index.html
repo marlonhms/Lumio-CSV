@@ -4,6 +4,15 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Lumio CSV — Visualizador & Editor de Dados Moderno</title>
+  <meta name="theme-color" content="#0f172a">
+  <meta name="description" content="Visualizador & Editor de CSV Ultraleve, Inteligente e 100% Offline com design Liquid Glass">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="icon" type="image/svg+xml" href="assets/icons/icon.svg">
+  <link rel="alternate icon" type="image/png" href="assets/icons/icon-192.png">
+  <link rel="apple-touch-icon" href="assets/icons/icon-192.png">
+  <link rel="manifest" href="manifest.webmanifest">
   <link rel="stylesheet" href="style.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -92,6 +101,18 @@
             <line x1="12" y1="15" x2="12" y2="3"></line>
           </svg>
           <span>Exportar</span>
+        </button>
+
+        <!-- Install / App Launcher Button -->
+        <button id="btnInstallApp" class="btn btn-install" title="Opções de Instalação & Atalho (PWA / Desktop)">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+            <line x1="8" y1="21" x2="16" y2="21"></line>
+            <line x1="12" y1="17" x2="12" y2="21"></line>
+            <polyline points="9 10 12 13 15 10"></polyline>
+            <line x1="12" y1="7" x2="12" y2="13"></line>
+          </svg>
+          <span>Instalar App</span>
         </button>
 
         <!-- Theme Preset Switcher -->
@@ -587,6 +608,66 @@
       <div class="modal-footer">
         <button id="btnCopyExportClipboard" class="btn">Copiar para Área de Transferência</button>
         <button id="btnDownloadExport" class="btn btn-primary">Baixar Arquivo</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: App Installation & Launch Options -->
+  <div id="modalInstallApp" class="modal-overlay">
+    <div class="modal-content" style="max-width: 620px;">
+      <div class="modal-header">
+        <h3 class="modal-title">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+            <line x1="8" y1="21" x2="16" y2="21"></line>
+            <line x1="12" y1="17" x2="12" y2="21"></line>
+            <polyline points="9 10 12 13 15 10"></polyline>
+            <line x1="12" y1="7" x2="12" y2="13"></line>
+          </svg>
+          Instalação & Acesso Rápido ao Lumio CSV
+        </h3>
+        <button class="modal-close-btn" data-close="modalInstallApp">&times;</button>
+      </div>
+      <div class="modal-body" style="display: flex; flex-direction: column; gap: 14px;">
+        <div class="install-card">
+          <div class="install-card-header">
+            <div class="install-badge-pwa">PWA Nativo</div>
+            <h4>Instalar no Navegador (Chrome / Edge / Brave)</h4>
+          </div>
+          <p style="font-size: 0.84rem; color: var(--text-secondary); line-height: 1.5;">
+            Instala o Lumio CSV como um aplicativo desktop dedicado: abre em sua própria janela independente, ganha ícone na barra de tarefas e funciona 100% offline.
+          </p>
+          <button id="btnTriggerPwaInstall" class="btn btn-primary" style="margin-top: 6px; width: 100%;">
+            ⚡ Instalar Agora no Navegador
+          </button>
+        </div>
+
+        <div class="install-card">
+          <div class="install-card-header">
+            <div class="install-badge-win">Windows 1-Click</div>
+            <h4>Criar Atalho na Área de Trabalho</h4>
+          </div>
+          <p style="font-size: 0.84rem; color: var(--text-secondary); line-height: 1.5;">
+            Cria um atalho oficial com ícone exclusivo na sua Área de Trabalho configurado no modo aplicativo standalone (sem janelas pretas de terminal).
+          </p>
+          <div class="install-code-box">
+            <code>scripts\criar_atalho_desktop.bat</code>
+            <span style="font-size: 0.75rem; color: var(--neon-cyan);">(Duplo clique no arquivo)</span>
+          </div>
+        </div>
+
+        <div class="install-card">
+          <div class="install-card-header">
+            <div class="install-badge-launch">Zero Janela</div>
+            <h4>Inicializador Silencioso Local</h4>
+          </div>
+          <p style="font-size: 0.84rem; color: var(--text-secondary); line-height: 1.5;">
+            Para abrir localmente sem exibir nenhum console do prompt de comando, basta dar duplo clique no arquivo <strong>Lumio CSV.vbs</strong> na pasta raiz.
+          </p>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn" data-close="modalInstallApp">Fechar</button>
       </div>
     </div>
   </div>

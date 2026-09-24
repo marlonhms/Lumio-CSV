@@ -1,0 +1,60 @@
+{
+  "name": "Lumio CSV — Visualizador & Editor de Dados",
+  "short_name": "Lumio CSV",
+  "description": "Visualizador e editor de CSV ultraleve, 100% offline com design Liquid Glass e detecção automática inteligente.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0a0c14",
+  "theme_color": "#0f172a",
+  "categories": ["productivity", "utilities", "business"],
+  "lang": "pt-BR",
+  "dir": "ltr",
+  "prefer_related_applications": false,
+  "icons": [
+    {
+      "src": "assets/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "assets/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "assets/icons/icon-512-maskable.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "assets/icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Carregar Exemplo",
+      "short_name": "Exemplo",
+      "description": "Abre o Lumio CSV com base de demonstração",
+      "url": "./index.html?sample=true",
+      "icons": [{ "src": "assets/icons/icon-192.png", "sizes": "192x192" }]
+    }
+  ],
+  "file_handlers": [
+    {
+      "action": "./index.html",
+      "name": "Arquivos de Dados Tabulares",
+      "accept": {
+        "text/csv": [".csv"],
+        "text/tab-separated-values": [".tsv"],
+        "text/plain": [".txt"]
+      }
+    }
+  ]
+}

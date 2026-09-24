@@ -5,22 +5,23 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Zero Dependencies](https://img.shields.io/badge/Dependencies-Zero-brightgreen.svg)]()
+[![PWA Ready](https://img.shields.io/badge/PWA-100%25%20Offline%20Ready-purple.svg)]()
 [![Pure Vanilla JS](https://img.shields.io/badge/Built%20With-HTML5%20%7C%20CSS3%20%7C%20Vanilla%20JS-orange.svg)]()
 [![100% Offline & Private](https://img.shields.io/badge/Privacy-100%25%20Local%20%26%20Offline-success.svg)]()
 [![PRs Welcome](https://img.shields.io/badge/PRs-Welcome-purple.svg)](https://github.com/marlonhms/Lumio-CSV/pulls)
 
 <p align="center">
-  <b>Nunca mais espere o Excel ou LibreOffice abrir só para dar uma olhada ou filtrar um arquivo CSV.</b><br>
-  Uma ferramenta open source prática, ultrarrápida, com design <i>Liquid Glass & Neon Edge Glow</i> que roda 100% no seu navegador sem enviar nenhum dado para a internet.
+  <b>Nunca mais espere o Excel ou LibreOffice abrir só para visualizar, filtrar ou editar um arquivo CSV.</b><br>
+  Uma ferramenta prática, ultrarrápida, com design <i>Liquid Glass & Neon Edge Glow</i> que roda 100% localmente no seu computador ou instalada como aplicativo nativo (PWA).
 </p>
 
 [Recursos Principais](#-recursos-principais) •
-[Como Usar](#-como-usar) •
+[Instalação & Como Usar](#-instalação--como-usar) •
 [Atalhos de Teclado](#-atalhos-de-teclado) •
-[Estrutura](#-estrutura-do-projeto) •
-[Testes](#-testes-automatizados) •
+[Estrutura do Projeto](#-estrutura-do-projeto) •
+[Testes Automatizados](#-testes-automatizados) •
 [Contribuindo](#-como-contribuir) •
-[Licença](#-licen%C3%A7a)
+[Licença](#-licença)
 
 ---
 
@@ -28,9 +29,9 @@
 
 ## 💡 Sobre o Projeto
 
-O **Lumio CSV** nasceu dentro da suíte de ferramentas práticas e leves com um objetivo claro: **eliminar o atrito e a lentidão de softwares de planilhas pesados** (como Microsoft Excel, LibreOffice Calc ou Google Docs) quando você só precisa inspecionar, validar, editar, filtrar ou converter dados em formato CSV, TSV ou TXT.
+O **Lumio CSV** nasceu com um objetivo claro: **eliminar o atrito e a lentidão de softwares de planilhas pesados** (como Microsoft Excel, LibreOffice Calc ou Google Sheets) quando você só precisa inspecionar, validar, editar, filtrar ou converter dados em formato CSV, TSV ou TXT.
 
-Construído inteiramente em **Vanilla JavaScript puro**, o Lumio CSV carrega em **milissegundos**, processa dezenas de milhares de linhas instantaneamente e opera **100% localmente no navegador** do usuário, garantindo privacidade absoluta dos seus dados.
+Construído inteiramente em **Vanilla JavaScript puro (zero dependências)**, o Lumio CSV carrega em **milissegundos**, processa dezenas de milhares de linhas instantaneamente e opera **100% localmente na sua máquina**, garantindo privacidade absoluta dos seus dados.
 
 ---
 
@@ -44,10 +45,10 @@ Construído inteiramente em **Vanilla JavaScript puro**, o Lumio CSV carrega em 
   - 🌲 **Emerald Matrix** (Verde Esmeralda)
   - 🔥 **Solar Flame** (Laranja & Âmbar)
 
-### ⚡ Inicialização Instantânea & Zero Dependências
-- Abre em milissegundos diretamente em qualquer navegador moderno (Chrome, Edge, Firefox, Brave, Safari, Opera).
-- **Sem CDNs obrigatórias, sem frameworks pesados, sem build step**: basta abrir o arquivo `index.html`.
-- **100% Privado e Seguro**: seus arquivos e registros nunca saem da sua máquina.
+### ⚡ Instalação Moderna PWA & 100% Offline
+- **Instalação em 1 Clique (PWA)**: instale diretamente pelo navegador (Chrome, Edge, Brave, Opera) como um aplicativo de desktop com janela dedicada, ícone na barra de tarefas e menu iniciar.
+- **Abertura Silenciosa**: inicializadores modernos sem abrir janelas pretas de terminal.
+- **100% Privado e Seguro**: nenhum dado é enviado para servidores externos.
 
 ### 🎯 Detecção Inteligente Automática (*Smart Sniffing*)
 - **Detecção de Delimitador**: detecta automaticamente vírgula (`,`), ponto e vírgula (`;`), tabulação (`\t`) e barra vertical (`|`).
@@ -63,7 +64,7 @@ Construído inteiramente em **Vanilla JavaScript puro**, o Lumio CSV carrega em 
 - **Nova Linha (`Ctrl+N`)**: insere novos registros instantaneamente no topo da tabela.
 - **Ações por Linha**: inspecione, duplique ou exclua linhas com 1 clique.
 - **Seleção em Lote**: barra flutuante com contagem de seleção, exclusão em massa, duplicação e cópia direta como JSON.
-- **Gerenciador de Colunas**: adicione colunas customizadas, renomeie em tempo real, ajuste a visibilidade, reordene colunas e ative auto-fit de largura.
+- **Gerenciador de Colunas**: redimensione interativamente (arrastando ou botões `+`/`-`), centralize conteúdos, ative Auto-Fit inteligente e reordene colunas por drag-and-drop.
 
 ### 🔍 Busca Global & Filtros Avançados
 - **Filtros Rápidos**: campo de filtro instantâneo no cabeçalho de cada coluna.
@@ -88,26 +89,65 @@ Construído inteiramente em **Vanilla JavaScript puro**, o Lumio CSV carrega em 
 
 ---
 
-## 🚀 Como Usar
+## 🚀 Instalação & Como Usar
 
-### Opção 1: Inicialização Rápida (Windows)
-Basta dar dois cliques no arquivo executável em lote:
-```cmd
-abrir_visualizador.bat
-```
+O Lumio CSV oferece opções modernas e elegantes de uso, eliminando a dependência obrigatória de arquivos `.bat` tradicionais:
 
-### Opção 2: Abrir Diretamente no Navegador (Qualquer SO)
-Dê um duplo clique ou abra o arquivo `index.html` em qualquer navegador:
+### 🌟 Opção 1: Instalação como App de Desktop (PWA — Recomendado)
+1. Inicie o servidor local com `npm start` ou executando `scripts/iniciar_servidor_local.bat`.
+2. No Google Chrome, Microsoft Edge ou Brave, clique no ícone **"Instalar Lumio CSV"** na barra de endereços (ou no botão **"Instalar App"** no topo da tela).
+3. O Lumio CSV será instalado como aplicativo nativo no seu sistema operacional:
+   - Ganha janela independente própria (sem barras de navegação de navegador).
+   - Cria ícone oficial na Área de Trabalho e no Menu Iniciar.
+   - Funciona 100% offline através de Service Worker (`sw.js`).
+   - Suporta abertura direta de arquivos CSV pelo Windows Explorer (File Handling API).
+
+---
+
+### 🖥️ Opção 2: Criar Atalho no Desktop do Windows (1 Clique)
+Para quem prefere um atalho direto na Área de Trabalho com ícone de alta resolução sem precisar de servidor:
+- Dê duplo clique em:
+  ```text
+  scripts/criar_atalho_desktop.bat
+  ```
+  *(ou execute `npm run shortcut`)*
+
+O instalador cria automaticamente o atalho oficial **"Lumio CSV.lnk"** na sua Área de Trabalho, configurado para abrir em modo de janela de aplicativo dedicada!
+
+---
+
+### 🔕 Opção 3: Inicialização Silenciosa Local (Zero Janela de Console)
+Para abrir instantaneamente no navegador padrão sem que apareça nenhuma tela preta de prompt de comando (CMD):
+- Dê duplo clique no arquivo:
+  ```text
+  Lumio CSV.vbs
+  ```
+
+---
+
+### 🌐 Opção 4: Abrir Diretamente no Navegador
+Basta abrir o arquivo `index.html` com qualquer navegador moderno de sua preferência:
 - Google Chrome
 - Microsoft Edge
 - Mozilla Firefox
 - Brave / Opera / Safari
 
-### Como Carregar Dados:
+---
+
+### ⚡ Opção 5: Inicializador Rápido Tradicional
+Se desejar usar o arquivo em lote clássico com terminal:
+```cmd
+abrir_visualizador.bat
+```
+
+---
+
+## 📥 Como Carregar Dados
+
 1. **Arrastar e Soltar (Drag & Drop)**: arraste qualquer arquivo `.csv`, `.tsv` ou `.txt` para dentro da janela.
-2. **Botão Abrir Arquivo**: selecione o arquivo do seu computador.
-3. **Colar CSV**: cole texto copiado diretamente da área de transferência.
-4. **Carregar Exemplo**: clique em "Exemplo" na tela inicial para testar imediatamente com uma base de demonstração.
+2. **Botão Abrir Arquivo**: selecione o arquivo do seu computador (`Ctrl+O`).
+3. **Colar CSV**: cole texto copiado diretamente da área de transferência (`Ctrl+V` ou pelo botão "Colar CSV").
+4. **Carregar Exemplo**: clique em "Exemplo" na tela inicial para testar imediatamente com uma base de demonstração rica.
 
 ---
 
@@ -130,34 +170,68 @@ Dê um duplo clique ou abra o arquivo `index.html` em qualquer navegador:
 
 ## 📁 Estrutura do Projeto
 
+O projeto possui uma arquitetura limpa, modular e organizada:
+
 ```text
-lumio-csv/
-├── index.html              # Interface do usuário (HTML5 Semântico + SVG Icons)
-├── style.css               # Design System Liquid Glass & Neon Edge Glow
-├── app.js                  # Lógica da aplicação, eventos e renderização da UI
-├── csv-engine.js           # Mecanismo RFC-4180 de parsing, sniff, filtros, ordenação e stats
-├── sample_data.csv         # Dataset de exemplo com métricas de produtos e vendas
-├── abrir_visualizador.bat  # Script para inicialização rápida no Windows
-├── LICENSE                 # Licença MIT
-├── README.md               # Documentação técnica e guia do usuário
-└── test_*.js               # Bateria de testes unitários e de integração
+Lumio-CSV/
+├── .github/
+│   └── workflows/
+│       └── deploy.yml              # CI/CD: Testes automáticos e deploy no GitHub Pages
+├── assets/
+│   └── icons/
+│       ├── icon.svg                # Ícone vetorial master Liquid Glass
+│       ├── icon-192.png            # Ícone PWA 192x192
+│       ├── icon-512.png            # Ícone PWA 512x512
+│       ├── icon-512-maskable.png   # Ícone PWA Maskable 512x512
+│       ├── icon-64.png             # Ícone para favicons
+│       └── lumio.ico               # Ícone nativo para atalhos do Windows
+├── scripts/
+│   ├── criar_atalho_desktop.ps1    # Script PowerShell para criar atalho no Desktop
+│   ├── criar_atalho_desktop.bat    # Executável de 1 clique para o script PowerShell
+│   ├── serve.js                    # Servidor local leve (zero dependências) para PWA
+│   ├── iniciar_servidor_local.bat  # Executável de 1 clique para o servidor local
+│   └── build_icons.js              # Gerador de ícones e assets de alta resolução
+├── tests/
+│   ├── run_all.js                  # Executor master com sumário colorido de testes
+│   ├── test_csv_engine.js          # Testes unitários do motor de parsing e análise
+│   ├── test_edge_cases.js          # Casos extremos (BOM, 10.000 linhas, formato BR)
+│   ├── test_new_features.js        # Testes de layout, auto-fit e reordenação (15k linhas)
+│   ├── test_column_resizing_and_autofit.js # Verificação de redimensionamento e CSS
+│   ├── test_app_deep_verification.js # Verificação profunda de layout e componentes
+│   └── test_pwa_and_structure.js   # Verificação de integridade PWA, manifesto e scripts
+├── index.html                      # Interface principal do usuário (HTML5 Semântico)
+├── style.css                       # Design System Liquid Glass & Neon Edge Glow
+├── app.js                          # Lógica da aplicação, eventos, PWA e controles de UI
+├── csv-engine.js                   # Motor puro de RFC-4180 parsing, filtros e estatísticas
+├── sw.js                           # Service Worker para funcionalidade 100% offline
+├── manifest.webmanifest            # Manifesto PWA com modo standalone e file handlers
+├── sample_data.csv                 # Dataset de demonstração
+├── Lumio CSV.vbs                   # Inicializador silencioso (zero janela de console)
+├── abrir_visualizador.bat          # Inicializador clássico em lote (compatibilidade)
+├── package.json                    # Scripts npm padronizados (start, test, shortcut)
+├── LICENSE                         # Licença MIT
+└── README.md                       # Documentação completa
 ```
 
 ---
 
 ## 🧪 Testes Automatizados
 
-O motor de parsing (`csv-engine.js`) e as regras de negócio possuem suítes de testes unitários e de estresse para Node.js:
+O Lumio CSV inclui uma suíte abrangente de testes automatizados com cobertura de parsing RFC-4180, performance com mais de 15.000 linhas, integridade de layout, auto-fit matemático e conformidade PWA.
+
+Para executar todas as suítes de testes:
 
 ```bash
-# Executa os testes do motor de CSV (sniffing, RFC-4180, tipos, ordenação, etc.)
-node test_csv_engine.js
+npm test
+```
 
-# Executa testes de performance e casos extremos com 10.000+ linhas
-node test_edge_cases.js
+*(Ou diretamente com Node.js: `node tests/run_all.js`)*
 
-# Executa testes de recursos complementares (auto-fit, reordenação, etc.)
-node test_new_features.js
+Para executar uma suíte específica:
+```bash
+node tests/test_csv_engine.js
+node tests/test_edge_cases.js
+node tests/test_pwa_and_structure.js
 ```
 
 ---
@@ -172,7 +246,7 @@ Contribuições são extremamente bem-vindas! Este é um projeto **Open Source**
 4. Faça o push para a branch (`git push origin feature/MinhaNovaFeature`)
 5. Abra um **Pull Request**
 
-Se encontrar algum bug ou tiver sugestões de novas funcionalidades, sinta-se à vontade para abrir uma [Issue](https://github.com/marlonhms/Lumio-CSV/issues).
+Se encontrar algum bug ou tiver sugestões de melhorias, fique à vontade para abrir uma [Issue](https://github.com/marlonhms/Lumio-CSV/issues).
 
 ---
 
@@ -184,5 +258,5 @@ Distribuído sob a licença **MIT**. Consulte o arquivo [LICENSE](LICENSE) para 
 
 <div align="center">
   Desenvolvido por <b><a href="https://github.com/marlonhms">Marlon Henrique Serpa</a></b><br>
-  <i>Ferramentas práticas e leves para o dia a dia.</i>
+  <i>Ferramentas práticas, ultraleves e modernas para o dia a dia.</i>
 </div>

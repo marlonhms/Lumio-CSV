@@ -2,7 +2,8 @@
  * Automated test suite for csv-engine.js
  */
 const assert = require('assert');
-const CsvEngine = require('./csv-engine.js');
+const path = require('path');
+const CsvEngine = require(path.join(__dirname, '../csv-engine.js'));
 
 console.log('--- RUNNING CSV ENGINE TESTS ---');
 
