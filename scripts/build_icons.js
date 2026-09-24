@@ -12,12 +12,25 @@ async function renderIcons() {
 
   const svgContent = fs.readFileSync(path.join(iconsDir, 'icon.svg'), 'utf8');
 
-  // Find browser (Edge or Chrome)
-  const edgePath = 'C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe';
-  const chromePath = 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe';
-  const browserBin = fs.existsSync(edgePath) ? edgePath : chromePath;
+  // Candidate browsers (Edge, Chrome, Brave on Windows, Linux, macOS)
+  const candidateBrowsers = [
+    'C:\\Program Files\\Microsoft\\Edge\\Application\\msedge.exe',
+    'C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe',
+    'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
+    'C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe',
+    path.join(process.env.LOCALAPPDATA || '', 'Google', 'Chrome', 'Application', 'chrome.exe'),
+    'C:\\Program Files\\BraveSoftware\\Brave-Browser\\Application\\brave.exe',
+    path.join(process.env.LOCALAPPDATA || '', 'BraveSoftware', 'Brave-Browser', 'Application', 'brave.exe'),
+    '/usr/bin/google-chrome',
+    '/usr/bin/chromium-browser',
+    '/usr/bin/chromium',
+    '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
+    '/Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge'
+  ];
 
-  if (!fs.existsSync(browserBin)) {
+  const browserBin = candidateBrowsers.find(b => fs.existsSync(b));
+
+  if (!browserBin) {
     console.error('No supported browser found for icon generation.');
     process.exit(1);
   }
@@ -206,7 +219,8 @@ function createIcoFromPngs(iconsDir) {
 
   const icoBuffer = Buffer.concat([headerBuf, ...entries, ...images.map(i => i.data)]);
   fs.writeFileSync(path.join(iconsDir, 'lumio.ico'), icoBuffer);
-  console.log('✔ Generated native lumio.ico');
+  fs.writeFileSync(path.join(__dirname, '..', 'favicon.ico'), icoBuffer);
+  console.log('✔ Generated native lumio.ico & root favicon.ico');
 }
 
 renderIcons().catch(err => {

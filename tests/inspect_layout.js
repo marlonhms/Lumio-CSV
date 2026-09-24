@@ -3,7 +3,7 @@ const path = require('path');
 
 const ROOT = path.join(__dirname, '..');
 const htmlPath = path.join(ROOT, 'index.html');
-const outPath = path.join(ROOT, 'test_render.html');
+const outPath = path.join(__dirname, 'test_render.html');
 
 let html = fs.readFileSync(htmlPath, 'utf8');
 html = html.replace('id="toolbarPanel" class="toolbar-panel glass-panel" style="display: none;"', 'id="toolbarPanel" class="toolbar-panel glass-panel" style="display: grid;"');

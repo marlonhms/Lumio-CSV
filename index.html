@@ -12,6 +12,7 @@
   <link rel="icon" type="image/svg+xml" href="assets/icons/icon.svg">
   <link rel="alternate icon" type="image/png" href="assets/icons/icon-192.png">
   <link rel="apple-touch-icon" href="assets/icons/icon-192.png">
+  <link rel="shortcut icon" href="favicon.ico">
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="stylesheet" href="style.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -629,14 +630,15 @@
         <button class="modal-close-btn" data-close="modalInstallApp">&times;</button>
       </div>
       <div class="modal-body" style="display: flex; flex-direction: column; gap: 14px;">
-        <div class="install-card">
+        <div class="install-card" id="cardPwaInstall">
           <div class="install-card-header">
             <div class="install-badge-pwa">PWA Nativo</div>
             <h4>Instalar no Navegador (Chrome / Edge / Brave)</h4>
           </div>
-          <p style="font-size: 0.84rem; color: var(--text-secondary); line-height: 1.5;">
-            Instala o Lumio CSV como um aplicativo desktop dedicado: abre em sua própria janela independente, ganha ícone na barra de tarefas e funciona 100% offline.
+          <p id="pwaCardDescription" style="font-size: 0.84rem; color: var(--text-secondary); line-height: 1.5;">
+            Instala o Lumio CSV como um aplicativo desktop dedicado: abre em sua própria janela independente, ganha ícone na barra de tarefas, menu iniciar e funciona 100% offline.
           </p>
+          <div id="pwaStatusNote" class="install-mode-note" style="display: none;"></div>
           <button id="btnTriggerPwaInstall" class="btn btn-primary" style="margin-top: 6px; width: 100%;">
             ⚡ Instalar Agora no Navegador
           </button>
@@ -645,24 +647,27 @@
         <div class="install-card">
           <div class="install-card-header">
             <div class="install-badge-win">Windows 1-Click</div>
-            <h4>Criar Atalho na Área de Trabalho</h4>
+            <h4>Criar Atalho na Área de Trabalho (Sem Terminal)</h4>
           </div>
           <p style="font-size: 0.84rem; color: var(--text-secondary); line-height: 1.5;">
-            Cria um atalho oficial com ícone exclusivo na sua Área de Trabalho configurado no modo aplicativo standalone (sem janelas pretas de terminal).
+            Cria o atalho oficial na Área de Trabalho com ícone exclusivo, configurado para abrir diretamente em modo de aplicativo standalone (sem janelas pretas de console).
           </p>
           <div class="install-code-box">
-            <code>scripts\criar_atalho_desktop.bat</code>
-            <span style="font-size: 0.75rem; color: var(--neon-cyan);">(Duplo clique no arquivo)</span>
+            <code>scripts\criar_atalho_desktop.vbs</code>
+            <span style="font-size: 0.75rem; color: var(--neon-cyan);">(Duplo clique silencioso)</span>
           </div>
+          <p style="font-size: 0.76rem; color: var(--text-muted); margin: 0;">
+            Alternativas disponíveis: <code>scripts\criar_atalho_desktop.ps1</code> ou <code>scripts\criar_atalho_desktop.bat</code>
+          </p>
         </div>
 
         <div class="install-card">
           <div class="install-card-header">
             <div class="install-badge-launch">Zero Janela</div>
-            <h4>Inicializador Silencioso Local</h4>
+            <h4>Inicializador Silencioso Standalone</h4>
           </div>
           <p style="font-size: 0.84rem; color: var(--text-secondary); line-height: 1.5;">
-            Para abrir localmente sem exibir nenhum console do prompt de comando, basta dar duplo clique no arquivo <strong>Lumio CSV.vbs</strong> na pasta raiz.
+            Para abrir instantaneamente em modo janela de aplicativo nativo sem exibir nenhuma tela preta de terminal, basta dar duplo clique no arquivo <strong>Lumio CSV.vbs</strong> na pasta raiz.
           </p>
         </div>
       </div>

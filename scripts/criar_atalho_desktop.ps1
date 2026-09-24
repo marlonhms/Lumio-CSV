@@ -25,18 +25,30 @@ if (-not (Test-Path $IndexHtml)) {
     exit 1
 }
 
-# Detect Edge or Chrome for native standalone app-window mode
-$EdgePath = "C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe"
-$ChromePath = "C:\Program Files\Google\Chrome\Application\chrome.exe"
-$LocalChromePath = "$env:LOCALAPPDATA\Google\Chrome\Application\chrome.exe"
+# Detect Chromium browser for native standalone app-window mode
+$CandidateBrowsers = @(
+    "C:\Program Files\Microsoft\Edge\Application\msedge.exe",
+    "C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe",
+    "C:\Program Files\Google\Chrome\Application\chrome.exe",
+    "C:\Program Files (x86)\Google\Chrome\Application\chrome.exe",
+    "$env:LOCALAPPDATA\Google\Chrome\Application\chrome.exe",
+    "C:\Program Files\BraveSoftware\Brave-Browser\Application\brave.exe",
+    "$env:LOCALAPPDATA\BraveSoftware\Brave-Browser\Application\brave.exe"
+)
 
 $BrowserExe = $null
-if (Test-Path $EdgePath) {
-    $BrowserExe = $EdgePath
-} elseif (Test-Path $ChromePath) {
-    $BrowserExe = $ChromePath
-} elseif (Test-Path $LocalChromePath) {
-    $BrowserExe = $LocalChromePath
+foreach ($path in $CandidateBrowsers) {
+    if (Test-Path $path) {
+        $BrowserExe = $path
+        break
+    }
+}
+
+if ($null -eq $BrowserExe) {
+    $edgeCmd = (Get-Command msedge.exe -ErrorAction SilentlyContinue).Source
+    $chromeCmd = (Get-Command chrome.exe -ErrorAction SilentlyContinue).Source
+    if ($edgeCmd) { $BrowserExe = $edgeCmd }
+    elseif ($chromeCmd) { $BrowserExe = $chromeCmd }
 }
 
 $WshShell = New-Object -ComObject WScript.Shell
@@ -58,7 +70,7 @@ if ($DefaultBrowser -or ($null -eq $BrowserExe)) {
     # Standalone App Window Mode (Frameless, clean native desktop look)
     $FileUri = "file:///" + ($IndexHtml -replace "\\", "/")
     $Shortcut.TargetPath = $BrowserExe
-    $Shortcut.Arguments = "--app=""$FileUri"" --user-data-dir=""$env:LOCALAPPDATA\LumioCSV\Profile"""
+    $Shortcut.Arguments = "--app=""$FileUri"""
     $Shortcut.WorkingDirectory = $ProjectDir
     $Shortcut.Description = "Lumio CSV - Visualizador & Editor de CSV Ultraleve"
     if (Test-Path $IconFile) {

@@ -7,7 +7,8 @@ const testSuites = [
   'test_new_features.js',
   'test_column_resizing_and_autofit.js',
   'test_app_deep_verification.js',
-  'test_pwa_and_structure.js'
+  'test_pwa_and_structure.js',
+  'test_in_browser.js'
 ];
 
 console.log('\n=============================================================');

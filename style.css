@@ -1882,3 +1882,44 @@ mark.search-highlight {
   color: var(--neon-cyan);
 }
 
+.btn-install.has-native-prompt {
+  background: linear-gradient(135deg, rgba(0, 240, 255, 0.18) 0%, rgba(168, 85, 247, 0.22) 100%);
+  border-color: var(--neon-cyan);
+  color: var(--neon-cyan);
+  box-shadow: 0 0 16px -2px var(--neon-cyan-glow);
+  animation: pwaPulse 2.5s infinite ease-in-out;
+}
+
+@keyframes pwaPulse {
+  0%, 100% {
+    box-shadow: 0 0 12px -2px var(--neon-cyan-glow);
+    border-color: var(--neon-cyan);
+  }
+  50% {
+    box-shadow: 0 0 22px 2px var(--neon-cyan);
+    border-color: #ffffff;
+  }
+}
+
+.install-mode-note {
+  font-size: 0.78rem;
+  line-height: 1.45;
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  background: rgba(0, 240, 255, 0.06);
+  border: 1px solid rgba(0, 240, 255, 0.2);
+  color: var(--text-secondary);
+}
+
+.install-mode-note.warning {
+  background: rgba(245, 158, 11, 0.08);
+  border-color: rgba(245, 158, 11, 0.3);
+  color: #fbbf24;
+}
+
+.install-mode-note.success {
+  background: rgba(16, 185, 129, 0.08);
+  border-color: rgba(16, 185, 129, 0.3);
+  color: #34d399;
+}
+

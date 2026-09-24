@@ -106,13 +106,15 @@ O Lumio CSV oferece opções modernas e elegantes de uso, eliminando a dependên
 
 ### 🖥️ Opção 2: Criar Atalho no Desktop do Windows (1 Clique)
 Para quem prefere um atalho direto na Área de Trabalho com ícone de alta resolução sem precisar de servidor:
-- Dê duplo clique em:
+- **Recomendado (Zero Terminal)**: Dê duplo clique em:
   ```text
-  scripts/criar_atalho_desktop.bat
+  scripts/criar_atalho_desktop.vbs
   ```
-  *(ou execute `npm run shortcut`)*
+  *(Cria o atalho silenciosamente com diálogo nativo de confirmação)*
+- **Alternativa em lote**: `scripts/criar_atalho_desktop.bat` *(ou `npm run shortcut`)*
+- **PowerShell**: `powershell -ExecutionPolicy Bypass -File scripts/criar_atalho_desktop.ps1`
 
-O instalador cria automaticamente o atalho oficial **"Lumio CSV.lnk"** na sua Área de Trabalho, configurado para abrir em modo de janela de aplicativo dedicada!
+O instalador cria automaticamente o atalho oficial **"Lumio CSV.lnk"** na sua Área de Trabalho, configurado para abrir diretamente em modo de janela de aplicativo dedicada (standalone, sem console)!
 
 ---
 
@@ -186,6 +188,7 @@ Lumio-CSV/
 │       ├── icon-64.png             # Ícone para favicons
 │       └── lumio.ico               # Ícone nativo para atalhos do Windows
 ├── scripts/
+│   ├── criar_atalho_desktop.vbs    # Instalador 1-clique silencioso (zero janela de console)
 │   ├── criar_atalho_desktop.ps1    # Script PowerShell para criar atalho no Desktop
 │   ├── criar_atalho_desktop.bat    # Executável de 1 clique para o script PowerShell
 │   ├── serve.js                    # Servidor local leve (zero dependências) para PWA
@@ -198,15 +201,17 @@ Lumio-CSV/
 │   ├── test_new_features.js        # Testes de layout, auto-fit e reordenação (15k linhas)
 │   ├── test_column_resizing_and_autofit.js # Verificação de redimensionamento e CSS
 │   ├── test_app_deep_verification.js # Verificação profunda de layout e componentes
-│   └── test_pwa_and_structure.js   # Verificação de integridade PWA, manifesto e scripts
+│   ├── test_pwa_and_structure.js   # Verificação de integridade PWA, manifesto e assets
+│   └── test_in_browser.js          # Teste E2E headless no navegador com CDP
 ├── index.html                      # Interface principal do usuário (HTML5 Semântico)
 ├── style.css                       # Design System Liquid Glass & Neon Edge Glow
 ├── app.js                          # Lógica da aplicação, eventos, PWA e controles de UI
 ├── csv-engine.js                   # Motor puro de RFC-4180 parsing, filtros e estatísticas
 ├── sw.js                           # Service Worker para funcionalidade 100% offline
 ├── manifest.webmanifest            # Manifesto PWA com modo standalone e file handlers
+├── favicon.ico                     # Favicon padrão no root para navegadores desktop
 ├── sample_data.csv                 # Dataset de demonstração
-├── Lumio CSV.vbs                   # Inicializador silencioso (zero janela de console)
+├── Lumio CSV.vbs                   # Inicializador silencioso standalone (zero console)
 ├── abrir_visualizador.bat          # Inicializador clássico em lote (compatibilidade)
 ├── package.json                    # Scripts npm padronizados (start, test, shortcut)
 ├── LICENSE                         # Licença MIT
@@ -217,7 +222,7 @@ Lumio-CSV/
 
 ## 🧪 Testes Automatizados
 
-O Lumio CSV inclui uma suíte abrangente de testes automatizados com cobertura de parsing RFC-4180, performance com mais de 15.000 linhas, integridade de layout, auto-fit matemático e conformidade PWA.
+O Lumio CSV inclui uma suíte abrangente de 7 testes automatizados com cobertura de parsing RFC-4180, performance com mais de 15.000 linhas, integridade de layout, auto-fit matemático, conformidade PWA e renderização real em navegador headless via Chrome DevTools Protocol (CDP).
 
 Para executar todas as suítes de testes:
 

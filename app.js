@@ -2736,13 +2736,79 @@ PED-1030;João Pedro Esteves;joao.esteves@email.com;02/03/2026;Hardware;Gabinete
       deferredInstallPrompt = e;
       if (elements.btnInstallApp) {
         elements.btnInstallApp.classList.add('has-native-prompt');
+        elements.btnInstallApp.title = 'Clique para instalar o Lumio CSV como aplicativo nativo';
       }
     });
 
     window.addEventListener('appinstalled', () => {
       deferredInstallPrompt = null;
+      if (elements.btnInstallApp) {
+        elements.btnInstallApp.classList.remove('has-native-prompt');
+        elements.btnInstallApp.innerHTML = `
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+            <polyline points="22 4 12 14.01 9 11.01"></polyline>
+          </svg>
+          <span>App Ativo</span>
+        `;
+      }
       showToast('Lumio CSV instalado com sucesso como aplicativo nativo!');
     });
+
+    // Check standalone display mode on launch
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+    if (isStandalone && elements.btnInstallApp) {
+      elements.btnInstallApp.innerHTML = `
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+          <polyline points="22 4 12 14.01 9 11.01"></polyline>
+        </svg>
+        <span>App Ativo</span>
+      `;
+      elements.btnInstallApp.title = 'Lumio CSV está rodando como aplicativo nativo standalone';
+    }
+
+    function updateInstallModalState() {
+      const pwaNote = document.getElementById('pwaStatusNote');
+      const pwaBtn = elements.btnTriggerPwaInstall;
+      const runningStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+
+      if (runningStandalone) {
+        if (pwaNote) {
+          pwaNote.className = 'install-mode-note success';
+          pwaNote.textContent = '✔ Lumio CSV já está rodando em sua própria janela de aplicativo nativo (Standalone PWA).';
+          pwaNote.style.display = 'block';
+        }
+        if (pwaBtn) pwaBtn.style.display = 'none';
+        return;
+      }
+
+      if (window.location.protocol === 'file:') {
+        if (pwaNote) {
+          pwaNote.className = 'install-mode-note warning';
+          pwaNote.textContent = 'ℹ Modo Arquivo Local (file://): O navegador desativa Service Workers e botões PWA em arquivos locais. Para ter o aplicativo desktop agora mesmo, use o Instalador de Atalho abaixo (scripts/criar_atalho_desktop.vbs) ou abra via servidor local (scripts/iniciar_servidor_local.bat).';
+          pwaNote.style.display = 'block';
+        }
+        if (pwaBtn) {
+          pwaBtn.textContent = '⚡ Iniciar com Servidor Local ou Atalho';
+        }
+      } else {
+        if (pwaNote) {
+          if (deferredInstallPrompt) {
+            pwaNote.className = 'install-mode-note success';
+            pwaNote.textContent = '✔ Navegador pronto para instalação nativa em 1 clique!';
+            pwaNote.style.display = 'block';
+          } else {
+            pwaNote.className = 'install-mode-note';
+            pwaNote.textContent = '💡 Dica: Se o botão abaixo não abrir o prompt, clique no ícone de instalar na barra de endereços (omnibox) ou no menu ⋮ > "Instalar Lumio CSV".';
+            pwaNote.style.display = 'block';
+          }
+        }
+        if (pwaBtn) {
+          pwaBtn.textContent = '⚡ Instalar Agora no Navegador';
+        }
+      }
+    }
 
     // 3. PWA File Handling API (Allows opening CSV/TSV/TXT files directly from Windows Explorer)
     if ('launchQueue' in window && window.LaunchParams && 'files' in window.LaunchParams.prototype) {
@@ -2773,6 +2839,7 @@ PED-1030;João Pedro Esteves;joao.esteves@email.com;02/03/2026;Hardware;Gabinete
           }
           deferredInstallPrompt = null;
         } else {
+          updateInstallModalState();
           openModal('modalInstallApp');
         }
       });
@@ -2784,8 +2851,10 @@ PED-1030;João Pedro Esteves;joao.esteves@email.com;02/03/2026;Hardware;Gabinete
           closeModal('modalInstallApp');
           deferredInstallPrompt.prompt();
           deferredInstallPrompt = null;
+        } else if (window.location.protocol === 'file:') {
+          showToast('No modo file://, use scripts/criar_atalho_desktop.vbs ou execute scripts/iniciar_servidor_local.bat para instalar pelo navegador.');
         } else {
-          showToast('Para instalar como app no navegador, inicie via servidor local (scripts/iniciar_servidor_local.bat) ou use o atalho da Área de Trabalho!');
+          showToast('Clique no ícone de instalação na barra de endereços (omnibox) ou no menu do navegador para instalar.');
         }
       });
     }

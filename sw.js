@@ -9,6 +9,7 @@ const STATIC_ASSETS = [
   './csv-engine.js',
   './manifest.webmanifest',
   './sample_data.csv',
+  './favicon.ico',
   './assets/icons/icon.svg',
   './assets/icons/icon-192.png',
   './assets/icons/icon-512.png',
@@ -76,7 +77,7 @@ self.addEventListener('fetch', (event) => {
       }).catch(() => {
         // Fallback for HTML navigation requests when offline
         if (request.mode === 'navigate') {
-          return caches.match('./index.html');
+          return caches.match('./index.html').then((res) => res || caches.match('./'));
         }
       });
     })
