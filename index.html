@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="neon">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lumio CSV — Visualizador & Editor de Dados Moderno</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <!-- Ambient Nebula Glass Orbs -->
+  <div class="ambient-bg">
+    <div class="ambient-orb ambient-orb-1"></div>
+    <div class="ambient-orb ambient-orb-2"></div>
+    <div class="ambient-orb ambient-orb-3"></div>
+  </div>
+
+  <!-- Hidden File Input -->
+  <input type="file" id="fileInput" accept=".csv,.tsv,.txt" style="display: none;">
+
+  <!-- Main Application Container -->
+  <div class="app-container">
+
+    <!-- Top Navigation Header -->
+    <header class="app-header glass-panel">
+      <div class="brand-section">
+        <div class="brand-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+          </svg>
+        </div>
+        <div class="brand-title">
+          Lumio <span>CSV</span>
+        </div>
+
+        <!-- Loaded File Info Badge -->
+        <div id="fileInfoBadge" class="file-info-badge" style="display: none;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+          </svg>
+          <span id="fileInfoName" class="file-info-name">dados.csv</span>
+          <span id="fileInfoDetails" style="font-size: 0.74rem; opacity: 0.7;">(0 linhas)</span>
+          <span id="unsavedIndicator" class="dirty-badge" style="display: none;">• Modificado</span>
+        </div>
+      </div>
+
+      <!-- Header Action Buttons -->
+      <div class="header-actions">
+        <button id="btnOpenModalPaste" class="btn" title="Colar dados CSV diretamente da área de transferência">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
+            <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
+          </svg>
+          <span>Colar CSV</span>
+        </button>
+
+        <button id="btnLoadSample" class="btn" title="Carregar dataset de demonstração com 30 produtos e transações">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+            <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+            <line x1="12" y1="22.08" x2="12" y2="12"></line>
+          </svg>
+          <span>Exemplo</span>
+        </button>
+
+        <button id="btnOpenFile" class="btn btn-primary" title="Abrir arquivo CSV do seu computador (Ctrl+O)">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="17 8 12 3 7 8"></polyline>
+            <line x1="12" y1="3" x2="12" y2="15"></line>
+          </svg>
+          <span>Abrir Arquivo</span>
+        </button>
+
+        <button id="btnQuickSave" class="btn btn-success" title="Salvar / Baixar CSV com alterações (Ctrl+S)" style="display: none;">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+            <polyline points="17 21 17 13 7 13 7 21"></polyline>
+            <polyline points="7 3 7 8 15 8"></polyline>
+          </svg>
+          <span>Salvar CSV</span>
+        </button>
+
+        <button id="btnExport" class="btn" title="Exportar dados filtrados para CSV, JSON, TSV ou Markdown" style="display: none;">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="7 10 12 15 17 10"></polyline>
+            <line x1="12" y1="15" x2="12" y2="3"></line>
+          </svg>
+          <span>Exportar</span>
+        </button>
+
+        <!-- Theme Preset Switcher -->
+        <button id="btnThemeToggle" class="btn btn-icon" title="Alternar Tema Neon Liquid Glass">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="5"></circle>
+            <line x1="12" y1="1" x2="12" y2="3"></line>
+            <line x1="12" y1="21" x2="12" y2="23"></line>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+            <line x1="1" y1="12" x2="3" y2="12"></line>
+            <line x1="21" y1="12" x2="23" y2="12"></line>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- Toolbar: Search, Filters & Organization Tools -->
+    <div id="toolbarPanel" class="toolbar-panel glass-panel" style="display: none;">
+      <!-- Quick Metrics Strip with FPS telemetry -->
+      <div class="metrics-strip">
+        <div class="metric-pill fps-pill" id="fpsTelemetry" title="Monitor de Performance & FPS em tempo real">
+          <span class="fps-indicator-dot"></span>
+          <strong id="fpsVal">-- FPS</strong>
+          <span id="renderTimeVal" style="font-size: 0.72rem; opacity: 0.7; font-family: var(--font-mono);">0.0ms</span>
+        </div>
+        <div class="metric-pill" title="Total de linhas no arquivo">
+          <span>Total:</span>
+          <strong id="metricTotalRows">0</strong>
+        </div>
+        <div class="metric-pill" title="Linhas visíveis após busca e filtros">
+          <span>Filtradas:</span>
+          <strong id="metricFilteredRows">0</strong>
+        </div>
+        <div class="metric-pill" id="pillSelectedRows" title="Linhas marcadas para ações em lote" style="display: none;">
+          <span>Selecionadas:</span>
+          <strong id="metricSelectedRows">0</strong>
+        </div>
+        <div class="metric-pill" title="Colunas visíveis / Total de colunas">
+          <span>Colunas:</span>
+          <strong id="metricTotalCols">0</strong>
+        </div>
+        <div class="metric-pill" title="Porcentagem de células sem valor preenchido">
+          <span>Vazias:</span>
+          <strong id="metricEmptyCells">0%</strong>
+        </div>
+      </div>
+
+      <!-- Global Search (Centered) -->
+      <div class="search-box-wrapper">
+        <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+        <input type="text" id="globalSearchInput" class="search-input" placeholder="Buscar em todas as colunas... (/ ou Ctrl+F)">
+        <div class="search-actions">
+          <button id="btnToggleRegex" class="badge-toggle" title="Ativar busca por Expressão Regular (Regex)">.*</button>
+          <button id="btnToggleCase" class="badge-toggle" title="Diferenciar Maiúsculas/Minúsculas">Aa</button>
+          <button id="btnClearSearch" class="search-clear-btn" title="Limpar busca">&times;</button>
+        </div>
+      </div>
+
+      <!-- Smart Control Tools & Organization -->
+      <div class="toolbar-controls">
+        <button id="btnAutoFitAll" class="btn btn-sm btn-action" title="Ajustar automaticamente a largura de todas as colunas ao conteúdo (Auto-Fit)">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>
+          </svg>
+          <span>Auto Fit</span>
+        </button>
+
+        <button id="btnAddRow" class="btn btn-sm btn-action" title="Inserir nova linha editável (Ctrl+N)">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+          </svg>
+          <span>Nova Linha</span>
+        </button>
+
+        <button id="btnAddColumnModalTrigger" class="btn btn-sm btn-action" title="Adicionar nova coluna de dados">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+            <line x1="12" y1="8" x2="12" y2="16"></line>
+            <line x1="8" y1="12" x2="16" y2="12"></line>
+          </svg>
+          <span>Nova Coluna</span>
+        </button>
+
+        <button id="btnToggleQuickFilters" class="btn btn-sm" title="Exibir/ocultar barra de busca individual sob cada coluna">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="4" y1="21" x2="4" y2="14"></line>
+            <line x1="4" y1="10" x2="4" y2="3"></line>
+            <line x1="12" y1="21" x2="12" y2="12"></line>
+            <line x1="12" y1="8" x2="12" y2="3"></line>
+            <line x1="20" y1="21" x2="20" y2="16"></line>
+            <line x1="20" y1="12" x2="20" y2="3"></line>
+            <line x1="1" y1="14" x2="7" y2="14"></line>
+            <line x1="9" y1="8" x2="15" y2="8"></line>
+            <line x1="17" y1="16" x2="23" y2="16"></line>
+          </svg>
+          <span>Filtros Rápidos</span>
+        </button>
+
+        <button id="btnOpenAdvFilter" class="btn btn-sm" title="Construtor com múltiplos critérios e condições">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
+          </svg>
+          <span>Filtros Avançados</span>
+          <span id="activeFilterBadge" class="filter-count-badge" style="display: none; padding: 1px 5px; font-size: 0.65rem;">0</span>
+        </button>
+
+        <button id="btnOpenColumnsModal" class="btn btn-sm" title="Ocultar, reordenar ou renomear colunas">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="7" height="18"></rect>
+            <rect x="14" y="3" width="7" height="18"></rect>
+          </svg>
+          <span>Colunas</span>
+        </button>
+
+        <button id="btnOpenStatsModal" class="btn btn-sm" title="Estatísticas completas, distribuição, mediana e desvio padrão">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="20" x2="18" y2="10"></line>
+            <line x1="12" y1="20" x2="12" y2="4"></line>
+            <line x1="6" y1="20" x2="6" y2="14"></line>
+          </svg>
+          <span>Estatísticas</span>
+        </button>
+
+        <button id="btnResetView" class="btn btn-sm" title="Limpar todos os filtros, ordenação e buscas">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="1 4 1 10 7 10"></polyline>
+            <polyline points="23 20 23 14 17 14"></polyline>
+            <path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"></path>
+          </svg>
+          <span>Resetar</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Main Viewport Area -->
+    <main class="main-view">
+
+      <!-- Drag & Drop Zone (Empty State) -->
+      <div id="dropzoneContainer" class="dropzone-state">
+        <div class="dropzone-icon-glow">
+          <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+            <line x1="16" y1="13" x2="8" y2="13"></line>
+            <line x1="16" y1="17" x2="8" y2="17"></line>
+            <polyline points="10 9 9 9 8 9"></polyline>
+          </svg>
+        </div>
+        <h2 class="dropzone-title">Arraste seu arquivo CSV aqui</h2>
+        <p class="dropzone-desc">
+          Visualizador e editor ultrarrápido, intuitivo e 100% privado no seu navegador.
+          Abra, filtre, edite células, adicione linhas/colunas e exporte sem nunca precisar de programas pesados.
+        </p>
+        <div class="dropzone-actions">
+          <button id="btnDropzoneSelect" class="btn btn-primary">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="17 8 12 3 7 8"></polyline>
+              <line x1="12" y1="3" x2="12" y2="15"></line>
+            </svg>
+            Selecionar Arquivo
+          </button>
+          <button id="btnDropzoneSample" class="btn">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polygon points="5 3 19 12 5 21 5 3"></polygon>
+            </svg>
+            Carregar Demonstração
+          </button>
+        </div>
+      </div>
+
+      <!-- Data Table Viewport Container -->
+      <div id="tableViewportContainer" class="table-viewport-container">
+        
+        <!-- Floating Batch Selection Action Bar -->
+        <div id="floatingSelectionBar" class="floating-selection-bar" style="display: none;">
+          <div class="floating-selection-info">
+            <span id="floatingSelectedCount" class="floating-badge">0</span>
+            <span>linha(s) selecionada(s)</span>
+          </div>
+          <div class="floating-selection-actions">
+            <button id="btnDeleteSelectedRows" class="btn btn-sm btn-danger" title="Excluir as linhas selecionadas">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="3 6 5 6 21 6"></polyline>
+                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+              </svg>
+              <span>Excluir</span>
+            </button>
+            <button id="btnDuplicateSelectedRows" class="btn btn-sm" title="Duplicar linhas selecionadas">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+              </svg>
+              <span>Duplicar</span>
+            </button>
+            <button id="btnCopySelectedJson" class="btn btn-sm" title="Copiar linhas selecionadas como JSON">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="16 18 22 12 16 6"></polyline>
+                <polyline points="8 6 2 12 8 18"></polyline>
+              </svg>
+              <span>Copiar JSON</span>
+            </button>
+            <button id="btnClearSelection" class="btn btn-sm btn-icon" title="Limpar seleção">&times;</button>
+          </div>
+        </div>
+
+        <div id="tableScrollArea" class="table-scroll-area">
+          <table id="dataTable" class="data-table">
+            <thead id="tableHead"></thead>
+            <tbody id="tableBody"></tbody>
+          </table>
+        </div>
+
+        <!-- Table Footer / Pagination & Format Controls -->
+        <footer class="table-footer">
+          <div id="paginationSummary">Mostrando 0 de 0 registros</div>
+
+          <div class="pagination-controls">
+            <button id="btnFirstPage" class="btn btn-sm page-btn" title="Primeira Página">«</button>
+            <button id="btnPrevPage" class="btn btn-sm page-btn" title="Página Anterior">‹</button>
+            <span id="pageIndicator" class="page-indicator">Página 1 de 1</span>
+            <button id="btnNextPage" class="btn btn-sm page-btn" title="Próxima Página">›</button>
+            <button id="btnLastPage" class="btn btn-sm page-btn" title="Última Página">»</button>
+          </div>
+
+          <div class="page-size-selector">
+            <span>Linhas:</span>
+            <select id="selectPageSize" class="glass-select">
+              <option value="25">25</option>
+              <option value="50" selected>50</option>
+              <option value="100">100</option>
+              <option value="250">250</option>
+              <option value="500">500</option>
+              <option value="1000">1000</option>
+              <option value="all">Todas</option>
+            </select>
+
+            <span style="margin-left: 8px;">Delimitador:</span>
+            <select id="selectDelimiter" class="glass-select" title="Alterar delimitador do CSV">
+              <option value="auto">Auto</option>
+              <option value=",">Vírgula (,)</option>
+              <option value=";">Ponto e vírgula (;)</option>
+              <option value="&#9;">Tabulação (\t)</option>
+              <option value="|">Pipe (|)</option>
+            </select>
+
+            <span style="margin-left: 8px;">Codificação:</span>
+            <select id="selectEncoding" class="glass-select" title="Alterar decodificação do texto para corrigir acentos">
+              <option value="utf-8" selected>UTF-8</option>
+              <option value="windows-1252">Windows-1252 (ANSI / Latin 1)</option>
+              <option value="iso-8859-1">ISO-8859-1</option>
+            </select>
+          </div>
+        </footer>
+      </div>
+
+    </main>
+
+  </div>
+
+  <!-- MODAL: Advanced Multi-Condition Filter -->
+  <div id="modalAdvFilter" class="modal-overlay">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
+          </svg>
+          Construtor de Filtros Inteligentes
+        </h3>
+        <button class="modal-close-btn" data-close="modalAdvFilter">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; gap: 8px; flex-wrap: wrap;">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span style="font-size: 0.82rem; color: var(--text-secondary);">Lógica dos filtros:</span>
+            <select id="selectFilterLogic" class="glass-select">
+              <option value="AND">TODAS as regras devem ser atendidas (E / AND)</option>
+              <option value="OR">QUALQUER regra atendida (OU / OR)</option>
+            </select>
+          </div>
+          <button id="btnAddFilterRule" class="btn btn-sm btn-primary">
+            <span>+ Adicionar Regra</span>
+          </button>
+        </div>
+
+        <div id="filterRulesList" class="filter-rules-list">
+          <!-- Dynamic rule rows injected by app.js -->
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button id="btnClearAllFilters" class="btn">Limpar Filtros</button>
+        <button id="btnApplyAdvFilters" class="btn btn-primary">Aplicar Filtros</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: Column Manager & Reorder -->
+  <div id="modalColumns" class="modal-overlay">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="7" height="18"></rect>
+            <rect x="14" y="3" width="7" height="18"></rect>
+          </svg>
+          Gerenciador de Colunas
+        </h3>
+        <button class="modal-close-btn" data-close="modalColumns">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; gap: 8px; flex-wrap: wrap;">
+          <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+            <button id="btnSelectAllCols" class="btn btn-sm">Marcar Todas</button>
+            <button id="btnDeselectAllCols" class="btn btn-sm">Desmarcar Todas</button>
+            <button id="btnModalAutoFitAll" class="btn btn-sm" title="Ajustar todas as larguras de coluna automaticamente">Auto-Fit Geral</button>
+            <button id="btnModalResetCols" class="btn btn-sm" title="Restaurar larguras e alinhamentos padrão">Resetar Ajustes</button>
+          </div>
+          <button id="btnOpenNewColFromManager" class="btn btn-sm btn-primary">+ Nova Coluna</button>
+        </div>
+        <div id="columnChecklistContainer" class="column-reorder-list">
+          <!-- Dynamic checklist injected by app.js -->
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-primary" data-close="modalColumns">Concluído</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: Add New Column -->
+  <div id="modalAddColumn" class="modal-overlay">
+    <div class="modal-content" style="max-width: 440px;">
+      <div class="modal-header">
+        <h3 class="modal-title">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+            <line x1="12" y1="8" x2="12" y2="16"></line>
+            <line x1="8" y1="12" x2="16" y2="12"></line>
+          </svg>
+          Adicionar Nova Coluna
+        </h3>
+        <button class="modal-close-btn" data-close="modalAddColumn">&times;</button>
+      </div>
+      <div class="modal-body" style="display: flex; flex-direction: column; gap: 12px;">
+        <div>
+          <label style="display: block; font-size: 0.78rem; color: var(--text-secondary); margin-bottom: 6px;">Nome da Coluna:</label>
+          <input type="text" id="inputNewColName" class="glass-input" style="width: 100%;" placeholder="Ex: Observações, Status_Interno, etc.">
+        </div>
+        <div>
+          <label style="display: block; font-size: 0.78rem; color: var(--text-secondary); margin-bottom: 6px;">Valor Inicial Padrão (opcional):</label>
+          <input type="text" id="inputNewColDefault" class="glass-input" style="width: 100%;" placeholder="Ex: Pendente, 0, ou deixe em branco">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn" data-close="modalAddColumn">Cancelar</button>
+        <button id="btnConfirmAddColumn" class="btn btn-primary">Criar Coluna</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: Column Profiler & Statistics -->
+  <div id="modalStats" class="modal-overlay">
+    <div class="modal-content" style="max-width: 680px;">
+      <div class="modal-header">
+        <h3 class="modal-title">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="20" x2="18" y2="10"></line>
+            <line x1="12" y1="20" x2="12" y2="4"></line>
+            <line x1="6" y1="20" x2="6" y2="14"></line>
+          </svg>
+          Perfil Analítico & Estatísticas da Coluna
+        </h3>
+        <button class="modal-close-btn" data-close="modalStats">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div style="margin-bottom: 16px;">
+          <label style="display: block; font-size: 0.78rem; color: var(--text-secondary); margin-bottom: 6px;">Selecione a coluna para analisar:</label>
+          <select id="selectStatsColumn" class="glass-select" style="width: 100%; height: 38px;"></select>
+        </div>
+
+        <div id="columnStatsDetails" class="column-stat-card">
+          <!-- Dynamic profiling card injected by app.js -->
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn" data-close="modalStats">Fechar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: Row Inspector & Live Editor -->
+  <div id="modalRowInspector" class="modal-overlay">
+    <div class="modal-content" style="max-width: 780px;">
+      <div class="modal-header">
+        <h3 class="modal-title">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+            <circle cx="12" cy="12" r="3"></circle>
+          </svg>
+          <span id="rowInspectorTitle">Inspecionar & Editar Registro #1</span>
+        </h3>
+        <button class="modal-close-btn" data-close="modalRowInspector">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div id="rowInspectorGrid" class="row-inspector-grid">
+          <!-- Editable key-value card pairs injected by app.js -->
+        </div>
+      </div>
+      <div class="modal-footer" style="justify-content: space-between;">
+        <div style="display: flex; gap: 8px;">
+          <button id="btnPrevRowInspector" class="btn btn-sm">‹ Registro Anterior</button>
+          <button id="btnNextRowInspector" class="btn btn-sm">Próximo Registro ›</button>
+        </div>
+        <div style="display: flex; gap: 8px;">
+          <button id="btnCopyRowJson" class="btn btn-sm">Copiar JSON</button>
+          <button id="btnSaveRowInspector" class="btn btn-sm btn-primary">Salvar Alterações</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: Paste Raw CSV Text -->
+  <div id="modalPaste" class="modal-overlay">
+    <div class="modal-content" style="max-width: 700px;">
+      <div class="modal-header">
+        <h3 class="modal-title">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
+            <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
+          </svg>
+          Colar Conteúdo CSV / TSV
+        </h3>
+        <button class="modal-close-btn" data-close="modalPaste">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size: 0.82rem; color: var(--text-secondary); margin-bottom: 10px;">
+          Cole os dados copiados de uma planilha (Excel, Google Sheets) ou arquivo texto delimitado:
+        </p>
+        <textarea id="pasteTextarea" class="glass-input" style="width: 100%; height: 260px; font-family: var(--font-mono); font-size: 0.8rem; padding: 12px; resize: vertical;" placeholder="Cole aqui seu texto CSV ou TSV..."></textarea>
+      </div>
+      <div class="modal-footer">
+        <button class="btn" data-close="modalPaste">Cancelar</button>
+        <button id="btnProcessPaste" class="btn btn-primary">Processar & Carregar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: Export Data -->
+  <div id="modalExport" class="modal-overlay">
+    <div class="modal-content" style="max-width: 520px;">
+      <div class="modal-header">
+        <h3 class="modal-title">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="7 10 12 15 17 10"></polyline>
+            <line x1="12" y1="15" x2="12" y2="3"></line>
+          </svg>
+          Exportar Dados
+        </h3>
+        <button class="modal-close-btn" data-close="modalExport">&times;</button>
+      </div>
+      <div class="modal-body" style="display: flex; flex-direction: column; gap: 14px;">
+        <div>
+          <label style="display: block; font-size: 0.78rem; color: var(--text-secondary); margin-bottom: 6px;">Formato de Exportação:</label>
+          <select id="selectExportFormat" class="glass-select" style="width: 100%;">
+            <option value="csv_comma">CSV Padrão (Delimitador Vírgula ,)</option>
+            <option value="csv_semi">CSV Brasileiro / Excel (Delimitador Ponto e Vírgula ;)</option>
+            <option value="json">JSON (Estruturado em Array de Objetos)</option>
+            <option value="tsv">TSV (Delimitado por Tabulação)</option>
+            <option value="markdown">Tabela Markdown</option>
+          </select>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+          <label class="checklist-item" style="cursor: pointer;">
+            <input type="checkbox" id="checkExportOnlyFiltered" checked>
+            <span>Exportar apenas linhas correspondentes aos filtros ativos</span>
+          </label>
+          <label class="checklist-item" style="cursor: pointer;">
+            <input type="checkbox" id="checkExportOnlyVisible" checked>
+            <span>Exportar apenas colunas atualmente visíveis</span>
+          </label>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button id="btnCopyExportClipboard" class="btn">Copiar para Área de Transferência</button>
+        <button id="btnDownloadExport" class="btn btn-primary">Baixar Arquivo</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Container -->
+  <div id="toastContainer" class="toast-container"></div>
+
+  <!-- Engine & Application Logic -->
+  <script src="csv-engine.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

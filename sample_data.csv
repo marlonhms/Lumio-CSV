@@ -1,0 +1,31 @@
+ID Pedido;Cliente;Email;Data;Categoria;Produto;Quantidade;Preço Unitário (R$);Desconto;Status;Cidade;UF;Avaliação
+PED-1001;Ana Clara Silveira;ana.silveira@email.com;15/01/2026;Eletrônicos;Notebook Dell XPS 13;1;7.899,00;5%;Concluído;São Paulo;SP;5.0
+PED-1002;Bruno Henrique Ramos;bruno.ramos@email.com;16/01/2026;Periféricos;Teclado Mecânico RGB;2;349,90;10%;Concluído;Rio de Janeiro;RJ;4.8
+PED-1003;Carla Medeiros Santos;carla.santos@email.com;16/01/2026;Monitores;Monitor Gamer UltraWide 34";1;2.790,00;0%;Em Trânsito;Curitiba;PR;4.9
+PED-1004;Diego Alves Pinheiro;diego.alves@email.com;18/01/2026;Acessórios;Mousepad Extra Grande Speed;3;89,90;15%;Concluído;Belo Horizonte;MG;4.5
+PED-1005;Eduardo Costa Lima;eduardo.lima@email.com;19/01/2026;Hardware;Placa de Vídeo RTX 4070;1;4.250,00;8%;Concluído;Porto Alegre;RS;5.0
+PED-1006;Fernanda Souza Dias;fernanda.dias@email.com;20/01/2026;Áudio;Headset Gamer Sem Fio 7.1;1;699,00;0%;Pendente;Salvador;BA;4.6
+PED-1007;Gabriel Rocha Castro;gabriel.castro@email.com;22/01/2026;Cadeiras;Cadeira Ergonômica Mesh Pro;1;1.450,00;12%;Concluído;Brasília;DF;4.7
+PED-1008;Helena Martins Nogueira;helena.martins@email.com;23/01/2026;Armazenamento;SSD NVMe 2TB PCIe 4.0;2;589,00;5%;Concluído;Florianópolis;SC;4.9
+PED-1009;Igor Pereira Batista;igor.batista@email.com;25/01/2026;Redes;Roteador Wi-Fi 6 Mesh Gigabit;2;420,00;10%;Cancelado;Recife;PE;3.8
+PED-1010;Juliana Ferreira Prado;juliana.prado@email.com;26/01/2026;Eletrônicos;Tablet 11" 128GB Wi-Fi;1;2.199,00;0%;Concluído;Campinas;SP;4.7
+PED-1011;Lucas Moreira Neves;lucas.neves@email.com;28/01/2026;Hardware;Processador Octa-Core 4.5GHz;1;1.890,00;5%;Em Trânsito;Goiânia;GO;4.9
+PED-1012;Mariana Guimarães Melo;mariana.melo@email.com;29/01/2026;Acessórios;Hub USB-C 8 em 1 HDMI 4K;2;179,90;0%;Concluído;Vitória;ES;4.6
+PED-1013;Natália Carvalho Vieira;natalia.vieira@email.com;01/02/2026;Periféricos;Mouse Sem Fio Ergonômico;1;219,00;7%;Concluído;São Paulo;SP;4.4
+PED-1014;Otávio Rezende Borges;otavio.borges@email.com;02/02/2026;Monitores;Monitor Profissional 4K 27";1;3.150,00;10%;Concluído;Santos;SP;5.0
+PED-1015;Patrícia Fonseca Barros;patricia.barros@email.com;04/02/2026;Áudio;Caixa de Som Bluetooth 40W;2;299,00;15%;Pendente;Fortaleza;CE;4.3
+PED-1016;Rodrigo Tavares Gomes;rodrigo.gomes@email.com;05/02/2026;Hardware;Memória RAM 32GB DDR5 6000MHz;2;720,00;0%;Concluído;São José dos Campos;SP;4.8
+PED-1017;Sabrina Cunha Freitas;sabrina.freitas@email.com;08/02/2026;Cadeiras;Suporte Articulado para 2 Monitores;1;289,90;5%;Concluído;Ribeirão Preto;SP;4.7
+PED-1018;Thiago Farias Cardoso;thiago.cardoso@email.com;09/02/2026;Armazenamento;HD Externo Portátil 4TB;1;480,00;0%;Em Trânsito;Cuiabá;MT;4.5
+PED-1019;Vanessa Pires Teixeira;vanessa.teixeira@email.com;11/02/2026;Eletrônicos;Mini PC Ryzen 7 32GB RAM;1;3.600,00;8%;Concluído;Natal;RN;5.0
+PED-1020;William Ribeiro Duarte;william.duarte@email.com;13/02/2026;Acessórios;Carregador GaN 100W 3 Portas;3;159,90;12%;Concluído;São Paulo;SP;4.9
+PED-1021;Amanda Miranda Toledo;amanda.toledo@email.com;14/02/2026;Periféricos;Webcam Full HD 60FPS com Microfone;1;329,00;0%;Concluído;Joinville;SC;4.6
+PED-1022;Bernardo Pacheco Correia;bernardo.correia@email.com;16/02/2026;Áudio;Microfone Condensador USB Podcast;1;459,00;10%;Cancelado;Niterói;RJ;4.0
+PED-1023;Camila Antunes Siqueira;camila.siqueira@email.com;18/02/2026;Redes;Switch Gigabit 8 Portas Metal;2;135,00;0%;Concluído;Londrina;PR;4.7
+PED-1024;Danilo Bezerra Aragão;danilo.aragao@email.com;20/02/2026;Hardware;Fonte Modular 750W 80 Plus Gold;1;599,00;5%;Em Trânsito;Manaus;AM;4.8
+PED-1025;Emanuelle Lacerda Cruz;emanuelle.cruz@email.com;22/02/2026;Cadeiras;Apoio de Pés Ergonômico Ajustável;2;119,00;15%;Concluído;Uberlândia;MG;4.4
+PED-1026;Felipe Brandão Franco;felipe.franco@email.com;24/02/2026;Monitores;Braço Articulado a Gás 32";1;220,00;0%;Concluído;Maringá;PR;4.8
+PED-1027;Gisele Albuquerque Paiva;gisele.paiva@email.com;26/02/2026;Eletrônicos;Smartwatch Esportivo GPS AMOLED;1;899,00;10%;Concluído;João Pessoa;PB;4.7
+PED-1028;Henrique Queiroz Couto;henrique.couto@email.com;27/02/2026;Armazenamento;Leitor de Cartão SD/MicroSD USB 3.2;4;49,90;20%;Pendente;Sorocaba;SP;4.2
+PED-1029;Isabela Moura Peixoto;isabela.peixoto@email.com;01/03/2026;Acessórios;Organizador de Cabos Espiral 5m;5;29,90;0%;Concluído;São Paulo;SP;4.5
+PED-1030;João Pedro Esteves;joao.esteves@email.com;02/03/2026;Hardware;Gabinete Mid-Tower Aquário Vidro;1;499,00;8%;Concluído;Belo Horizonte;MG;4.9
