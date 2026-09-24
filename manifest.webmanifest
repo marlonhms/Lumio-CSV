@@ -1,7 +1,7 @@
 {
-  "name": "Lumio CSV — Visualizador & Editor de Dados",
+  "name": "Lumio CSV: Visualizador e Editor de Dados",
   "short_name": "Lumio CSV",
-  "description": "Visualizador e editor de CSV ultraleve, 100% offline com design Liquid Glass e detecção automática inteligente.",
+  "description": "Visualizador e editor de CSV e Excel offline com interface Liquid Glass e detecção automática de formato.",
   "id": "./index.html",
   "start_url": "./index.html",
   "scope": "./",

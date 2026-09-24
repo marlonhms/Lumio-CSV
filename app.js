@@ -1815,7 +1815,7 @@ PED-1030;João Pedro Esteves;joao.esteves@email.com;02/03/2026;Hardware;Gabinete
       end = Math.min(start + size - 1, total);
     }
 
-    elements.paginationSummary.textContent = `Mostrando ${start.toLocaleString('pt-BR')}–${end.toLocaleString('pt-BR')} de ${total.toLocaleString('pt-BR')} registros`;
+    elements.paginationSummary.textContent = `Mostrando ${start.toLocaleString('pt-BR')}-${end.toLocaleString('pt-BR')} de ${total.toLocaleString('pt-BR')} registros`;
     elements.pageIndicator.textContent = `Página ${state.currentPage} de ${totalPages}`;
 
     elements.btnFirstPage.disabled = state.currentPage <= 1;

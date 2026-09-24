@@ -1,7 +1,7 @@
 {
   "name": "lumio-csv",
   "version": "1.1.0",
-  "description": "Visualizador & Editor de CSV Ultraleve, Inteligente e 100% Offline com design Liquid Glass",
+  "description": "Visualizador e editor de CSV e Excel offline com interface Liquid Glass",
   "main": "index.html",
   "scripts": {
     "start": "node scripts/serve.js",
