@@ -183,14 +183,6 @@
           <span>Auto Fit</span>
         </button>
 
-        <button id="btnAddRow" class="btn btn-sm btn-action" title="Inserir nova linha editável (Ctrl+N)">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <line x1="12" y1="5" x2="12" y2="19"></line>
-            <line x1="5" y1="12" x2="19" y2="12"></line>
-          </svg>
-          <span>Nova Linha</span>
-        </button>
-
         <button id="btnToggleQuickFilters" class="btn btn-sm" title="Exibir/ocultar barra de busca individual sob cada coluna">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <line x1="4" y1="21" x2="4" y2="14"></line>
@@ -214,12 +206,12 @@
           <span id="activeFilterBadge" class="filter-count-badge" style="display: none; padding: 1px 5px; font-size: 0.65rem;">0</span>
         </button>
 
-        <button id="btnOpenColumnsModal" class="btn btn-sm" title="Gerenciar visibilidade e alinhamento das colunas">
+        <button id="btnOpenColumnsModal" class="btn btn-sm" title="Ocultar, evidenciar ou reordenar colunas">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <rect x="3" y="3" width="7" height="18"></rect>
-            <rect x="14" y="3" width="7" height="18"></rect>
+            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+            <circle cx="12" cy="12" r="3"></circle>
           </svg>
-          <span>Colunas</span>
+          <span>Ocultar Colunas</span>
         </button>
 
         <button id="btnOpenStatsModal" class="btn btn-sm" title="Estatísticas completas, distribuição, mediana e desvio padrão">
@@ -425,17 +417,20 @@
       <div class="modal-header">
         <h3 class="modal-title">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <rect x="3" y="3" width="7" height="18"></rect>
-            <rect x="14" y="3" width="7" height="18"></rect>
+            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+            <circle cx="12" cy="12" r="3"></circle>
           </svg>
-          Gerenciador de Colunas
+          Ocultar e Evidenciar Colunas
         </h3>
         <button class="modal-close-btn" data-close="modalColumns">&times;</button>
       </div>
       <div class="modal-body">
+        <p style="font-size: 0.82rem; color: var(--text-secondary); margin-bottom: 12px;">
+          Marque as colunas visíveis ou clique em <strong>Evidenciar</strong> para focar em colunas específicas:
+        </p>
         <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px;">
-          <button id="btnSelectAllCols" class="btn btn-sm">Marcar Todas</button>
-          <button id="btnDeselectAllCols" class="btn btn-sm">Desmarcar Todas</button>
+          <button id="btnSelectAllCols" class="btn btn-sm">Mostrar Todas</button>
+          <button id="btnDeselectAllCols" class="btn btn-sm">Ocultar Outras</button>
           <button id="btnModalAutoFitAll" class="btn btn-sm" title="Ajustar todas as larguras de coluna automaticamente">Auto-Fit Geral</button>
           <button id="btnModalResetCols" class="btn btn-sm" title="Restaurar larguras e alinhamentos padrão">Resetar Ajustes</button>
         </div>

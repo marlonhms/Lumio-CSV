@@ -110,7 +110,6 @@ PED-1030;João Pedro Esteves;joao.esteves@email.com;02/03/2026;Hardware;Gabinete
     metricEmptyCells: document.getElementById('metricEmptyCells'),
 
     btnAutoFitAll: document.getElementById('btnAutoFitAll'),
-    btnAddRow: document.getElementById('btnAddRow'),
     btnToggleQuickFilters: document.getElementById('btnToggleQuickFilters'),
     btnOpenAdvFilter: document.getElementById('btnOpenAdvFilter'),
     activeFilterBadge: document.getElementById('activeFilterBadge'),
@@ -701,6 +700,36 @@ PED-1030;João Pedro Esteves;joao.esteves@email.com;02/03/2026;Hardware;Gabinete
     showToast(`Coluna "${sourceCol}" reposicionada com sucesso.`);
   }
 
+  /**
+   * Hide a single column from view
+   */
+  function hideColumn(col) {
+    if (state.visibleHeaders.length <= 1) {
+      showToast('Pelo menos uma coluna deve permanecer visível.');
+      return;
+    }
+    state.visibleHeaders = state.visibleHeaders.filter(h => h !== col);
+    markDirty(true);
+    renderTableHeader();
+    renderTableBody();
+    updateMetrics();
+    if (elements.columnChecklistContainer) renderColumnChecklist();
+    showToast(`Coluna "${col}" ocultada. Use "Ocultar Colunas" para reexibir.`);
+  }
+
+  /**
+   * Isolate a single column (show only this column, hiding all others)
+   */
+  function isolateColumn(col) {
+    state.visibleHeaders = [col];
+    markDirty(true);
+    renderTableHeader();
+    renderTableBody();
+    updateMetrics();
+    if (elements.columnChecklistContainer) renderColumnChecklist();
+    showToast(`Evidenciando apenas a coluna "${col}".`);
+  }
+
   let isDraggingColumn = false;
 
   /**
@@ -811,6 +840,12 @@ PED-1030;João Pedro Esteves;joao.esteves@email.com;02/03/2026;Hardware;Gabinete
             <button class="th-action-btn" data-autofit="${escapeHtml(header)}" title="Auto-Fit (Ajustar largura inteligente)">
               <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>
+              </svg>
+            </button>
+            <button class="th-action-btn" data-hide="${escapeHtml(header)}" title="Ocultar coluna &quot;${escapeHtml(header)}&quot;">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                <line x1="1" y1="1" x2="23" y2="23"></line>
               </svg>
             </button>
             <button class="th-action-btn" data-stats="${escapeHtml(header)}" title="Estatísticas e Perfil desta coluna">
@@ -1057,6 +1092,15 @@ PED-1030;João Pedro Esteves;joao.esteves@email.com;02/03/2026;Hardware;Gabinete
         btnAutofit.addEventListener('click', (e) => {
           e.stopPropagation();
           autoFitColumn(header);
+        });
+      }
+
+      // Hide column button
+      const btnHide = th.querySelector('[data-hide]');
+      if (btnHide) {
+        btnHide.addEventListener('click', (e) => {
+          e.stopPropagation();
+          hideColumn(header);
         });
       }
 
@@ -1544,40 +1588,6 @@ PED-1030;João Pedro Esteves;joao.esteves@email.com;02/03/2026;Hardware;Gabinete
         state.filteredData.every(r => state.selectedRowIds.has(r.__rowId));
       selectAllCheckbox.checked = allFilteredSelected;
     }
-  }
-
-  /**
-   * Add a new editable row
-   */
-  function addNewRow() {
-    const newId = (state.data.length > 0 ? Math.max(...state.data.map(r => r.__rowId || 0)) : 0) + 1;
-    const newRecord = { __rowId: newId };
-
-    state.headers.forEach(h => {
-      newRecord[h] = '';
-    });
-
-    state.data.unshift(newRecord);
-    markDirty(true);
-    updateFileDetailsBadge();
-    recomputeFilteredData();
-    state.currentPage = 1;
-    renderTableBody();
-    updateMetrics();
-
-    showToast(`Nova linha #${newId} adicionada no topo.`);
-
-    // Focus first cell of new row
-    setTimeout(() => {
-      const firstRow = elements.tableBody.querySelector('tr');
-      if (firstRow) {
-        const firstEditable = firstRow.querySelector('.editable-cell');
-        if (firstEditable) {
-          const header = firstEditable.getAttribute('data-col');
-          startInlineEdit(firstEditable, newRecord, header);
-        }
-      }
-    }, 50);
   }
 
   /**
@@ -2111,8 +2121,6 @@ PED-1030;João Pedro Esteves;joao.esteves@email.com;02/03/2026;Hardware;Gabinete
       });
     }
 
-    elements.btnAddRow.addEventListener('click', addNewRow);
-
     elements.btnToggleQuickFilters.addEventListener('click', () => {
       state.showQuickFilters = !state.showQuickFilters;
       renderTableHeader();
@@ -2347,9 +2355,6 @@ PED-1030;João Pedro Esteves;joao.esteves@email.com;02/03/2026;Hardware;Gabinete
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'o') {
         e.preventDefault();
         elements.fileInput.click();
-      } else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'n') {
-        e.preventDefault();
-        addNewRow();
       } else if (e.key === '/' || ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'f')) {
         e.preventDefault();
         elements.globalSearchInput.focus();
@@ -2413,20 +2418,24 @@ PED-1030;João Pedro Esteves;joao.esteves@email.com;02/03/2026;Hardware;Gabinete
 
     elements.btnSelectAllCols.addEventListener('click', () => {
       state.visibleHeaders = [...state.headers];
+      markDirty(true);
       renderColumnChecklist();
       renderTableHeader();
       renderTableBody();
       updateMetrics();
+      showToast('Todas as colunas estão visíveis.');
     });
 
     elements.btnDeselectAllCols.addEventListener('click', () => {
       if (state.headers.length > 0) {
         state.visibleHeaders = [state.headers[0]];
       }
+      markDirty(true);
       renderColumnChecklist();
       renderTableHeader();
       renderTableBody();
       updateMetrics();
+      showToast('Colunas ocultadas. Apenas a primeira coluna mantida.');
     });
 
     // Stats Column Selection Dropdown
@@ -2536,6 +2545,7 @@ PED-1030;João Pedro Esteves;joao.esteves@email.com;02/03/2026;Hardware;Gabinete
           <span style="font-size: 0.72rem; color: var(--text-muted); font-family: var(--font-mono);">(${state.inferredTypes[header] || 'texto'})</span>
         </div>
         <div class="col-manager-actions">
+          <button class="btn btn-sm" data-isolate-col="${escapeHtml(header)}" title="Evidenciar apenas esta coluna e ocultar as demais">Evidenciar</button>
           <button class="btn btn-sm btn-icon" data-shrink-col="${escapeHtml(header)}" title="Diminuir largura (-35px)">−</button>
           <span class="col-width-pill" title="Largura atual da coluna">${colWidth}px</span>
           <button class="btn btn-sm btn-icon" data-expand-col="${escapeHtml(header)}" title="Expandir largura (+35px)">+</button>
@@ -2568,6 +2578,14 @@ PED-1030;João Pedro Esteves;joao.esteves@email.com;02/03/2026;Hardware;Gabinete
         renderTableBody();
         updateMetrics();
       });
+
+      // Isolate single column
+      const btnIsolate = item.querySelector('[data-isolate-col]');
+      if (btnIsolate) {
+        btnIsolate.addEventListener('click', () => {
+          isolateColumn(header);
+        });
+      }
 
       // Shrink single column
       const btnShrink = item.querySelector('[data-shrink-col]');
