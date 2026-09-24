@@ -194,19 +194,22 @@ Lumio-CSV/
 │   └── workflows/
 │       └── deploy.yml              # CI/CD: Testes automáticos e deploy no GitHub Pages
 ├── assets/
-│   └── icons/
-│       ├── icon.svg                # Ícone vetorial master Liquid Glass
-│       ├── icon-192.png            # Ícone PWA 192x192
-│       ├── icon-512.png            # Ícone PWA 512x512
-│       ├── icon-512-maskable.png   # Ícone PWA Maskable 512x512
-│       ├── icon-64.png             # Ícone para favicons
-│       └── lumio.ico               # Ícone nativo para atalhos do Windows
+│   ├── icons/
+│   │   ├── icon.svg                # Ícone vetorial master Liquid Glass
+│   │   ├── icon-192.png            # Ícone PWA 192x192
+│   │   ├── icon-512.png            # Ícone PWA 512x512
+│   │   ├── icon-512-maskable.png   # Ícone PWA Maskable 512x512
+│   │   ├── icon-64.png             # Ícone para favicons
+│   │   └── lumio.ico               # Ícone nativo para atalhos do Windows
+│   └── vendor/
+│       └── xlsx.full.min.js        # Parser & encoder Excel (.xls/.xlsx) 100% offline
 ├── scripts/
 │   ├── criar_atalho_desktop.vbs    # Instalador 1-clique silencioso (zero janela de console)
 │   ├── criar_atalho_desktop.ps1    # Script PowerShell para criar atalho no Desktop
 │   ├── criar_atalho_desktop.bat    # Executável de 1 clique para o script PowerShell
 │   ├── serve.js                    # Servidor local leve (zero dependências) para PWA
 │   ├── iniciar_servidor_local.bat  # Executável de 1 clique para o servidor local
+│   ├── generate_sample_xls.js      # Gerador de planilhas de teste .xls multi-abas
 │   └── build_icons.js              # Gerador de ícones e assets de alta resolução
 ├── tests/
 │   ├── run_all.js                  # Executor master com sumário colorido de testes
@@ -216,6 +219,7 @@ Lumio-CSV/
 │   ├── test_column_resizing_and_autofit.js # Verificação de redimensionamento e CSS
 │   ├── test_app_deep_verification.js # Verificação profunda de layout e componentes
 │   ├── test_pwa_and_structure.js   # Verificação de integridade PWA, manifesto e assets
+│   ├── test_excel_support.js       # Testes de importação/exportação Excel (.xlsx e .xls)
 │   └── test_in_browser.js          # Teste E2E headless no navegador com CDP
 ├── index.html                      # Interface principal do usuário (HTML5 Semântico)
 ├── style.css                       # Design System Liquid Glass & Neon Edge Glow
@@ -224,7 +228,9 @@ Lumio-CSV/
 ├── sw.js                           # Service Worker para funcionalidade 100% offline
 ├── manifest.webmanifest            # Manifesto PWA com modo standalone e file handlers
 ├── favicon.ico                     # Favicon padrão no root para navegadores desktop
-├── sample_data.csv                 # Dataset de demonstração
+├── sample_data.csv                 # Dataset de demonstração CSV
+├── teste_produtos.xls              # Planilha de teste Excel legada multi-abas (.xls)
+├── teste_clientes.xls              # Planilha de teste Excel legada simples (.xls)
 ├── Lumio CSV.vbs                   # Inicializador silencioso standalone (zero console)
 ├── abrir_visualizador.bat          # Inicializador clássico em lote (compatibilidade)
 ├── package.json                    # Scripts npm padronizados (start, test, shortcut)
@@ -236,7 +242,7 @@ Lumio-CSV/
 
 ## 🧪 Testes Automatizados
 
-O Lumio CSV inclui uma suíte abrangente de 7 testes automatizados com cobertura de parsing RFC-4180, performance com mais de 15.000 linhas, integridade de layout, auto-fit matemático, conformidade PWA e renderização real em navegador headless via Chrome DevTools Protocol (CDP).
+O Lumio CSV inclui uma suíte abrangente de **8 testes automatizados** com cobertura de parsing RFC-4180, interoperabilidade Excel (.xlsx e .xls legada), performance com mais de 15.000 linhas, integridade de layout, auto-fit matemático, conformidade PWA e renderização real em navegador headless via Chrome DevTools Protocol (CDP).
 
 Para executar todas as suítes de testes:
 
@@ -249,6 +255,7 @@ npm test
 Para executar uma suíte específica:
 ```bash
 node tests/test_csv_engine.js
+node tests/test_excel_support.js
 node tests/test_edge_cases.js
 node tests/test_pwa_and_structure.js
 ```
