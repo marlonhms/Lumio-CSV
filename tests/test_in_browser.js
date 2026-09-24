@@ -95,7 +95,12 @@ async function main() {
     }
 
     const page = pages.find(p => p.type === 'page') || pages[0];
-    ws = new WebSocket(page.webSocketDebuggerUrl);
+    const WS = typeof WebSocket !== 'undefined' ? WebSocket : (typeof globalThis !== 'undefined' ? globalThis.WebSocket : null);
+    if (!WS) {
+      console.log('Skipping CDP browser test: WebSocket API is not supported in this Node runtime.');
+      return;
+    }
+    ws = new WS(page.webSocketDebuggerUrl);
     let id = 1;
     const callbacks = new Map();
 
