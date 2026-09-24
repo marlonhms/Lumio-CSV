@@ -312,15 +312,7 @@ html, body {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 170px;
-  display: inline-block;
-}
-
-.file-info-details {
-  font-size: 0.74rem;
-  opacity: 0.72;
-  white-space: nowrap;
-  flex-shrink: 0;
+  max-width: 280px;
   display: inline-block;
 }
 

@@ -90,7 +90,6 @@ PED-1030;João Pedro Esteves;joao.esteves@email.com;02/03/2026;Hardware;Gabinete
     btnThemeToggle: document.getElementById('btnThemeToggle'),
     fileInfoBadge: document.getElementById('fileInfoBadge'),
     fileInfoName: document.getElementById('fileInfoName'),
-    fileInfoDetails: document.getElementById('fileInfoDetails'),
     unsavedIndicator: document.getElementById('unsavedIndicator'),
 
     toolbarPanel: document.getElementById('toolbarPanel'),
@@ -347,7 +346,6 @@ PED-1030;João Pedro Esteves;joao.esteves@email.com;02/03/2026;Hardware;Gabinete
     elements.fileInfoBadge.style.display = 'flex';
     const displayName = sheetName ? `${fileName} [${sheetName}]` : fileName;
     elements.fileInfoName.textContent = displayName;
-    updateFileDetailsBadge();
 
     // Switch view from dropzone to table
     elements.dropzoneContainer.style.display = 'none';
@@ -505,9 +503,6 @@ PED-1030;João Pedro Esteves;joao.esteves@email.com;02/03/2026;Hardware;Gabinete
       });
   }
 
-  function updateFileDetailsBadge() {
-    elements.fileInfoDetails.textContent = `(${state.data.length.toLocaleString('pt-BR')} linhas, ${state.headers.length} colunas)`;
-  }
 
   /**
    * Recompute filtered dataset based on search, column quick-filters & active rules
