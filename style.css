@@ -702,6 +702,7 @@ html, body {
   position: relative;
 }
 
+/* Sleek Neon Scrollbars & Lightsaber Horizontal Bar */
 .table-scroll-area {
   flex: 1;
   overflow: auto;
@@ -709,34 +710,156 @@ html, body {
   overscroll-behavior: contain;
   will-change: scroll-position;
   -webkit-overflow-scrolling: touch;
+  scrollbar-color: #38bdf8 rgba(6, 10, 18, 0.85);
 }
 
-.table-scroll-area.is-scrolling tbody tr,
-.table-scroll-area.is-scrolling tbody td {
-  pointer-events: none !important;
+.table-scroll-area::-webkit-scrollbar {
+  width: 8px;
+  height: 12px;
 }
 
-/* Sleek Neon Scrollbars */
-.table-scroll-area::-webkit-scrollbar,
 body::-webkit-scrollbar {
   width: 8px;
   height: 8px;
 }
 
-.table-scroll-area::-webkit-scrollbar-track,
+::-webkit-scrollbar-button {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
+.table-scroll-area::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+.table-scroll-area::-webkit-scrollbar-track {
+  background: rgba(6, 10, 18, 0.85);
+  border-radius: var(--radius-full);
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  box-shadow: inset 0 1px 4px rgba(0, 0, 0, 0.6);
+}
+
+.table-scroll-area::-webkit-scrollbar-track:hover {
+  background: rgba(10, 16, 28, 0.95);
+  box-shadow: inset 0 0 8px rgba(0, 240, 255, 0.15);
+}
+
 body::-webkit-scrollbar-track {
   background: rgba(0, 0, 0, 0.2);
 }
 
-.table-scroll-area::-webkit-scrollbar-thumb,
+/* Lightsaber Thumb: Warm Cyan-Blue with Metallic Gray Degradé */
+.table-scroll-area::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, 
+    #ffffff 0%, 
+    #e0f2fe 12%, 
+    #38bdf8 32%, 
+    #00d2ff 58%, 
+    #64748b 82%, 
+    #334155 100%
+  );
+  border-radius: var(--radius-full);
+  border: 1px solid rgba(56, 189, 248, 0.45);
+  box-shadow: 
+    0 0 10px rgba(0, 240, 255, 0.65), 
+    0 0 20px rgba(0, 240, 255, 0.25), 
+    inset 0 1px 2px rgba(255, 255, 255, 0.9);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.table-scroll-area::-webkit-scrollbar-thumb:horizontal {
+  background: linear-gradient(180deg, 
+    #ffffff 0%, 
+    #e0f2fe 12%, 
+    #38bdf8 32%, 
+    #00d2ff 58%, 
+    #64748b 82%, 
+    #334155 100%
+  );
+}
+
+.table-scroll-area::-webkit-scrollbar-thumb:vertical {
+  background: linear-gradient(90deg, 
+    #ffffff 0%, 
+    #e0f2fe 12%, 
+    #38bdf8 32%, 
+    #00d2ff 58%, 
+    #64748b 82%, 
+    #334155 100%
+  );
+}
+
 body::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.18);
   border-radius: var(--radius-full);
   border: 2px solid transparent;
   background-clip: padding-box;
 }
 
-.table-scroll-area::-webkit-scrollbar-thumb:hover,
+/* Lightsaber Thumb Ignition on Hover (Acende o Glow) */
+.table-scroll-area::-webkit-scrollbar-thumb:hover {
+  border-color: #ffffff;
+  box-shadow: 
+    0 0 16px rgba(0, 240, 255, 1), 
+    0 0 32px rgba(0, 240, 255, 0.7), 
+    0 0 48px rgba(0, 240, 255, 0.4), 
+    inset 0 1px 3px #ffffff;
+  filter: brightness(1.22);
+}
+
+.table-scroll-area::-webkit-scrollbar-thumb:horizontal:hover {
+  background: linear-gradient(180deg, 
+    #ffffff 0%, 
+    #ffffff 22%, 
+    #67e8f9 42%, 
+    #00f0ff 68%, 
+    #38bdf8 88%, 
+    #64748b 100%
+  );
+}
+
+.table-scroll-area::-webkit-scrollbar-thumb:vertical:hover {
+  background: linear-gradient(90deg, 
+    #ffffff 0%, 
+    #ffffff 22%, 
+    #67e8f9 42%, 
+    #00f0ff 68%, 
+    #38bdf8 88%, 
+    #64748b 100%
+  );
+}
+
+.table-scroll-area::-webkit-scrollbar-thumb:active {
+  box-shadow: 
+    0 0 22px rgba(0, 240, 255, 1), 
+    0 0 45px rgba(0, 240, 255, 0.85), 
+    0 0 60px rgba(0, 240, 255, 0.5), 
+    inset 0 1px 3px #ffffff;
+  cursor: grabbing;
+}
+
+.table-scroll-area::-webkit-scrollbar-thumb:horizontal:active {
+  background: linear-gradient(180deg, 
+    #ffffff 0%, 
+    #a5f3fc 20%, 
+    #00f0ff 50%, 
+    #0284c7 90%, 
+    #1e293b 100%
+  );
+}
+
+.table-scroll-area::-webkit-scrollbar-thumb:vertical:active {
+  background: linear-gradient(90deg, 
+    #ffffff 0%, 
+    #a5f3fc 20%, 
+    #00f0ff 50%, 
+    #0284c7 90%, 
+    #1e293b 100%
+  );
+}
+
 body::-webkit-scrollbar-thumb:hover {
   background: var(--accent-primary);
   box-shadow: 0 0 10px var(--accent-primary);
