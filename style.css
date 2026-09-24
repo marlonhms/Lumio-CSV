@@ -266,25 +266,25 @@ html, body {
   -webkit-text-fill-color: initial;
 }
 
-.dirty-badge {
-  font-size: 0.72rem;
-  font-weight: 600;
-  padding: 2px 8px;
-  border-radius: var(--radius-full);
-  background: rgba(255, 183, 3, 0.15);
-  color: var(--neon-amber);
-  border: 1px solid rgba(255, 183, 3, 0.35);
-  box-shadow: 0 0 8px rgba(255, 183, 3, 0.3);
-  animation: pulseAmber 2s infinite alternate;
+.dirty-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--neon-amber, #f59e0b);
+  box-shadow: 0 0 6px #f59e0b, 0 0 12px rgba(245, 158, 11, 0.6);
+  flex-shrink: 0;
+  display: inline-block;
+  animation: pulseAmber 1.6s infinite alternate;
+  cursor: help;
 }
 
 @keyframes pulseAmber {
-  0% { opacity: 0.75; }
-  100% { opacity: 1; }
+  0% { opacity: 0.65; transform: scale(0.9); }
+  100% { opacity: 1; transform: scale(1.1); }
 }
 
 .file-info-badge {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   gap: 8px;
   padding: 4px 12px;
@@ -293,7 +293,17 @@ html, body {
   border: 1px solid var(--glass-border);
   font-size: 0.82rem;
   color: var(--text-secondary);
-  max-width: 380px;
+  white-space: nowrap;
+  max-width: 480px;
+  height: 32px;
+  box-sizing: border-box;
+  flex-shrink: 1;
+}
+
+.file-info-icon {
+  flex-shrink: 0;
+  color: var(--accent-primary);
+  opacity: 0.85;
 }
 
 .file-info-name {
@@ -302,6 +312,16 @@ html, body {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  max-width: 170px;
+  display: inline-block;
+}
+
+.file-info-details {
+  font-size: 0.74rem;
+  opacity: 0.72;
+  white-space: nowrap;
+  flex-shrink: 0;
+  display: inline-block;
 }
 
 .header-actions {
@@ -410,7 +430,55 @@ html, body {
 .btn-icon {
   width: 36px;
   height: 36px;
+  min-width: 36px;
   padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.btn-icon svg {
+  pointer-events: none;
+}
+
+/* Modern Floating Tooltips */
+[data-tooltip] {
+  position: relative;
+}
+
+[data-tooltip]::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  top: calc(100% + 7px);
+  left: 50%;
+  transform: translateX(-50%) translateY(-3px);
+  padding: 5px 9px;
+  border-radius: var(--radius-sm);
+  background: rgba(10, 14, 24, 0.96);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #f1f5f9;
+  font-size: 0.72rem;
+  font-weight: 500;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.16s ease, transform 0.16s ease;
+  z-index: 1000;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.6), 0 0 10px rgba(0, 240, 255, 0.12);
+  backdrop-filter: blur(10px);
+}
+
+[data-tooltip]:hover::after {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(0);
+}
+
+.btn-success.has-unsaved {
+  border-color: var(--neon-amber);
+  box-shadow: 0 0 12px rgba(255, 183, 3, 0.45);
 }
 
 .btn-sm {

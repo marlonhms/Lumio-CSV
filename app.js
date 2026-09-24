@@ -246,6 +246,9 @@ PED-1030;João Pedro Esteves;joao.esteves@email.com;02/03/2026;Hardware;Gabinete
   function markDirty(dirty = true) {
     state.isDirty = dirty;
     elements.unsavedIndicator.style.display = dirty ? 'inline-block' : 'none';
+    if (elements.btnQuickSave) {
+      elements.btnQuickSave.classList.toggle('has-unsaved', dirty);
+    }
   }
 
   let xlsxLoadingPromise = null;
@@ -503,7 +506,7 @@ PED-1030;João Pedro Esteves;joao.esteves@email.com;02/03/2026;Hardware;Gabinete
   }
 
   function updateFileDetailsBadge() {
-    elements.fileInfoDetails.textContent = `(${state.data.length.toLocaleString('pt-BR')} linhas • ${state.headers.length} colunas)`;
+    elements.fileInfoDetails.textContent = `(${state.data.length.toLocaleString('pt-BR')} linhas, ${state.headers.length} colunas)`;
   }
 
   /**
