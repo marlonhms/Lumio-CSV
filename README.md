@@ -3,6 +3,7 @@
 # ⚡ Lumio CSV
 ### Visualizador & Editor de CSV Ultraleve, Inteligente e Moderno
 
+[![Live Demo](https://img.shields.io/badge/Demo-Acessar%20Online-00d2ff?style=for-the-badge&logo=googlechrome&logoColor=white)](https://marlonhms.github.io/Lumio-CSV/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Zero Dependencies](https://img.shields.io/badge/Dependencies-Zero-brightgreen.svg)]()
 [![PWA Ready](https://img.shields.io/badge/PWA-100%25%20Offline%20Ready-purple.svg)]()
@@ -12,7 +13,11 @@
 
 <p align="center">
   <b>Nunca mais espere o Excel ou LibreOffice abrir só para visualizar, filtrar ou editar um arquivo CSV.</b><br>
-  Uma ferramenta prática, ultrarrápida, com design <i>Liquid Glass & Neon Edge Glow</i> que roda 100% localmente no seu computador ou instalada como aplicativo nativo (PWA).
+  Uma ferramenta prática, ultrarrápida, com design <i>Liquid Glass & Neon Edge Glow</i> que roda 100% no seu navegador ou instalada como aplicativo nativo (PWA).
+</p>
+
+<p align="center">
+  🚀 <b><a href="https://marlonhms.github.io/Lumio-CSV/">Clique aqui para acessar o Lumio CSV Online (sem instalar nada)</a></b>
 </p>
 
 [Recursos Principais](#-recursos-principais) •
@@ -93,19 +98,15 @@ Construído inteiramente em **Vanilla JavaScript puro (zero dependências)**, o 
 
 O Lumio CSV oferece opções modernas e elegantes de uso, eliminando a dependência obrigatória de arquivos `.bat` tradicionais:
 
-### 🌟 Opção 1: Instalação como App de Desktop (PWA — Recomendado)
-1. Inicie o servidor local com `npm start` ou executando `scripts/iniciar_servidor_local.bat`.
-2. No Google Chrome, Microsoft Edge ou Brave, clique no ícone **"Instalar Lumio CSV"** na barra de endereços (ou no botão **"Instalar App"** no topo da tela).
-3. O Lumio CSV será instalado como aplicativo nativo no seu sistema operacional:
-   - Ganha janela independente própria (sem barras de navegação de navegador).
-   - Cria ícone oficial na Área de Trabalho e no Menu Iniciar.
-   - Funciona 100% offline através de Service Worker (`sw.js`).
-   - Suporta abertura direta de arquivos CSV pelo Windows Explorer (File Handling API).
+### 🌐 Opção 1: Acesso Online Direto & PWA no Navegador (Recomendado)
+Acesse instantaneamente sem precisar baixar ou instalar nada:
+- **Link Online**: **[https://marlonhms.github.io/Lumio-CSV/](https://marlonhms.github.io/Lumio-CSV/)**
+- No Chrome, Edge ou Brave, você pode clicar no ícone de instalar na barra de endereços (ou no botão **"Instalar App"** no topo da tela) para transformá-lo em um aplicativo nativo no seu computador!
 
 ---
 
-### 🖥️ Opção 2: Criar Atalho no Desktop do Windows (1 Clique)
-Para quem prefere um atalho direto na Área de Trabalho com ícone de alta resolução sem precisar de servidor:
+### 🖥️ Opção 2: Criar Atalho no Desktop do Windows (1 Clique — Sem Terminal)
+Para quem prefere utilizar a versão local com atalho na Área de Trabalho e ícone de alta resolução:
 - **Recomendado (Zero Terminal)**: Dê duplo clique em:
   ```text
   scripts/criar_atalho_desktop.vbs
@@ -127,7 +128,14 @@ Para abrir instantaneamente no navegador padrão sem que apareça nenhuma tela p
 
 ---
 
-### 🌐 Opção 4: Abrir Diretamente no Navegador
+### ⚡ Opção 4: Executar Servidor Local PWA
+Se desejar rodar o PWA com Service Worker e cache localmente:
+1. Inicie o servidor local com `npm start` ou executando `scripts/iniciar_servidor_local.bat`.
+2. Acesse `http://localhost:8080` e clique em **"Instalar App"**.
+
+---
+
+### 🌐 Opção 5: Abrir Diretamente no Navegador
 Basta abrir o arquivo `index.html` com qualquer navegador moderno de sua preferência:
 - Google Chrome
 - Microsoft Edge
@@ -136,7 +144,7 @@ Basta abrir o arquivo `index.html` com qualquer navegador moderno de sua prefer�
 
 ---
 
-### ⚡ Opção 5: Inicializador Rápido Tradicional
+### ⚡ Opção 6: Inicializador Tradicional
 Se desejar usar o arquivo em lote clássico com terminal:
 ```cmd
 abrir_visualizador.bat
