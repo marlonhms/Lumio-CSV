@@ -1,5 +1,5 @@
 // Lumio CSV - Service Worker (PWA Offline Engine)
-const CACHE_NAME = 'lumio-csv-v1.2.0';
+const CACHE_NAME = 'lumio-csv-v1.2.1';
 
 const STATIC_ASSETS = [
   './',

@@ -121,8 +121,9 @@ PED-1030;João Pedro Esteves;joao.esteves@email.com;02/03/2026;Hardware;Gabinete
     metricEmptyCells: document.getElementById('metricEmptyCells'),
 
     btnAutoFitAll: document.getElementById('btnAutoFitAll'),
+    btnOpenFilterModal: document.getElementById('btnOpenFilterModal') || document.getElementById('btnOpenAdvFilter'),
     btnToggleQuickFilters: document.getElementById('btnToggleQuickFilters'),
-    btnOpenAdvFilter: document.getElementById('btnOpenAdvFilter'),
+    btnOpenAdvFilter: document.getElementById('btnOpenFilterModal') || document.getElementById('btnOpenAdvFilter'),
     activeFilterBadge: document.getElementById('activeFilterBadge'),
     btnOpenColumnsModal: document.getElementById('btnOpenColumnsModal'),
     btnOpenStatsModal: document.getElementById('btnOpenStatsModal'),
@@ -164,6 +165,13 @@ PED-1030;João Pedro Esteves;joao.esteves@email.com;02/03/2026;Hardware;Gabinete
     btnClearAllFilters: document.getElementById('btnClearAllFilters'),
     btnApplyAdvFilters: document.getElementById('btnApplyAdvFilters'),
     selectFilterLogic: document.getElementById('selectFilterLogic'),
+    modeCardQuick: document.getElementById('modeCardQuick'),
+    modeCardAdv: document.getElementById('modeCardAdv'),
+    filterTabQuick: document.getElementById('filterTabQuick'),
+    filterTabAdvanced: document.getElementById('filterTabAdvanced'),
+    checkToggleQuickFiltersRow: document.getElementById('checkToggleQuickFiltersRow'),
+    quickFiltersModalList: document.getElementById('quickFiltersModalList'),
+    btnClearQuickColFilters: document.getElementById('btnClearQuickColFilters'),
 
     modalColumns: document.getElementById('modalColumns'),
     columnChecklistContainer: document.getElementById('columnChecklistContainer'),
@@ -2294,11 +2302,13 @@ PED-1030;João Pedro Esteves;joao.esteves@email.com;02/03/2026;Hardware;Gabinete
       });
     }
 
-    elements.btnToggleQuickFilters.addEventListener('click', () => {
-      state.showQuickFilters = !state.showQuickFilters;
-      renderTableHeader();
-      showToast(state.showQuickFilters ? 'Filtros rápidos exibidos.' : 'Filtros rápidos ocultados.');
-    });
+    if (elements.btnToggleQuickFilters) {
+      elements.btnToggleQuickFilters.addEventListener('click', () => {
+        state.showQuickFilters = !state.showQuickFilters;
+        renderTableHeader();
+        showToast(state.showQuickFilters ? 'Filtros rápidos exibidos.' : 'Filtros rápidos ocultados.');
+      });
+    }
 
     // Batch Selection Bar Buttons
     elements.btnDeleteSelectedRows.addEventListener('click', deleteSelectedRows);
@@ -2831,11 +2841,78 @@ PED-1030;João Pedro Esteves;joao.esteves@email.com;02/03/2026;Hardware;Gabinete
       renderStatsForColumn(e.target.value);
     });
 
-    // Advanced Filter Modal
-    elements.btnOpenAdvFilter.addEventListener('click', () => {
-      renderFilterRulesList();
-      openModal('modalAdvFilter');
+    // ==========================================================================
+    // Unified Filter Hub (Quick & Advanced Filters)
+    // ==========================================================================
+    function switchFilterMode(mode) {
+      const isAdv = mode === 'advanced';
+      if (elements.filterTabQuick) {
+        elements.filterTabQuick.style.display = isAdv ? 'none' : 'block';
+      }
+      if (elements.filterTabAdvanced) {
+        elements.filterTabAdvanced.style.display = isAdv ? 'block' : 'none';
+      }
+
+      const radios = document.querySelectorAll('input[name="filterModeChoice"]');
+      radios.forEach(r => {
+        r.checked = (r.value === mode);
+      });
+
+      if (elements.modeCardQuick) {
+        elements.modeCardQuick.classList.toggle('active', !isAdv);
+      }
+      if (elements.modeCardAdv) {
+        elements.modeCardAdv.classList.toggle('active', isAdv);
+      }
+    }
+
+    const modeRadios = document.querySelectorAll('input[name="filterModeChoice"]');
+    modeRadios.forEach(radio => {
+      radio.addEventListener('change', (e) => {
+        switchFilterMode(e.target.value);
+      });
     });
+
+    if (elements.checkToggleQuickFiltersRow) {
+      elements.checkToggleQuickFiltersRow.addEventListener('change', (e) => {
+        state.showQuickFilters = e.target.checked;
+        renderTableHeader();
+      });
+    }
+
+    if (elements.btnClearQuickColFilters) {
+      elements.btnClearQuickColFilters.addEventListener('click', () => {
+        state.columnFilters = {};
+        renderQuickFiltersModalList();
+        renderTableHeader();
+        recomputeFilteredData();
+        renderTableBody();
+        updateMetrics();
+        showToast('Buscas das colunas limpas.');
+      });
+    }
+
+    const filterTriggerBtn = elements.btnOpenFilterModal || elements.btnOpenAdvFilter;
+    if (filterTriggerBtn) {
+      filterTriggerBtn.addEventListener('click', () => {
+        if (elements.checkToggleQuickFiltersRow) {
+          elements.checkToggleQuickFiltersRow.checked = !!state.showQuickFilters;
+        }
+        renderQuickFiltersModalList();
+        renderFilterRulesList();
+
+        // Default to advanced if advanced rules exist and no column filters, else quick
+        const hasAdv = state.advancedRules && state.advancedRules.length > 0;
+        const hasCol = Object.values(state.columnFilters).some(v => v && String(v).trim());
+        if (hasAdv && !hasCol) {
+          switchFilterMode('advanced');
+        } else {
+          switchFilterMode('quick');
+        }
+
+        openModal('modalAdvFilter');
+      });
+    }
 
     elements.btnAddFilterRule.addEventListener('click', () => {
       state.advancedRules.push({
@@ -2850,15 +2927,38 @@ PED-1030;João Pedro Esteves;joao.esteves@email.com;02/03/2026;Hardware;Gabinete
 
     elements.btnClearAllFilters.addEventListener('click', () => {
       state.advancedRules = [];
+      state.columnFilters = {};
       renderFilterRulesList();
+      renderQuickFiltersModalList();
+      renderTableHeader();
       recomputeFilteredData();
       renderTableBody();
       updateMetrics();
       closeModal('modalAdvFilter');
-      showToast('Filtros avançados removidos.');
+      showToast('Todos os filtros foram removidos.');
     });
 
     elements.btnApplyAdvFilters.addEventListener('click', () => {
+      // 1. Sync column quick filters from modal inputs
+      if (elements.quickFiltersModalList) {
+        const inputs = elements.quickFiltersModalList.querySelectorAll('.quick-modal-col-input');
+        inputs.forEach(inp => {
+          const col = inp.getAttribute('data-col');
+          const val = inp.value.trim();
+          if (val) {
+            state.columnFilters[col] = val;
+          } else {
+            delete state.columnFilters[col];
+          }
+        });
+      }
+
+      // 2. Sync quick filter table row toggle
+      if (elements.checkToggleQuickFiltersRow) {
+        state.showQuickFilters = elements.checkToggleQuickFiltersRow.checked;
+      }
+
+      // 3. Sync Advanced Rules
       const rows = elements.filterRulesList.querySelectorAll('.filter-rule-row');
       const updatedRules = [];
 
@@ -2881,14 +2981,24 @@ PED-1030;João Pedro Esteves;joao.esteves@email.com;02/03/2026;Hardware;Gabinete
       });
 
       state.advancedRules = updatedRules;
-      state.ruleLogic = elements.selectFilterLogic.value;
+      if (elements.selectFilterLogic) {
+        state.ruleLogic = elements.selectFilterLogic.value;
+      }
       state.currentPage = 1;
 
       recomputeFilteredData();
+      renderTableHeader();
       renderTableBody();
       updateMetrics();
       closeModal('modalAdvFilter');
-      showToast(`${state.advancedRules.length} filtro(s) aplicado(s).`);
+
+      const colFilterCount = Object.values(state.columnFilters).filter(v => v && String(v).trim()).length;
+      const totalCount = state.advancedRules.length + colFilterCount;
+      if (totalCount > 0) {
+        showToast(`${totalCount} filtro(s) ativo(s) aplicado(s).`);
+      } else {
+        showToast('Filtros atualizados.');
+      }
     });
 
     // Export Modal Triggers
@@ -3041,6 +3151,74 @@ PED-1030;João Pedro Esteves;joao.esteves@email.com;02/03/2026;Hardware;Gabinete
       }
 
       container.appendChild(item);
+    });
+  }
+
+  /**
+   * Render Column Search Inputs inside Quick Filter Tab in Filter Modal
+   */
+  function renderQuickFiltersModalList() {
+    const list = elements.quickFiltersModalList;
+    if (!list) return;
+    list.innerHTML = '';
+
+    const cols = (state.visibleHeaders && state.visibleHeaders.length > 0)
+      ? state.visibleHeaders
+      : state.headers;
+
+    if (!cols || cols.length === 0) {
+      list.innerHTML = `
+        <div style="text-align: center; padding: 24px; color: var(--text-muted); font-size: 0.85rem;">
+          Nenhuma coluna disponível para filtrar no momento.
+        </div>
+      `;
+      return;
+    }
+
+    cols.forEach(header => {
+      const row = document.createElement('div');
+      row.className = 'quick-filter-modal-row';
+
+      const colType = (state.inferredTypes && state.inferredTypes[header]) || 'text';
+      const typeLabel = colType === 'number' ? '123' : (colType === 'date' ? 'DATA' : 'TXT');
+      const currentVal = state.columnFilters[header] || '';
+
+      row.innerHTML = `
+        <div class="quick-filter-modal-col-name" title="${escapeHtml(header)}">
+          <span class="quick-filter-modal-col-badge">${typeLabel}</span>
+          <span style="overflow: hidden; text-overflow: ellipsis;">${escapeHtml(header)}</span>
+        </div>
+        <div class="quick-filter-modal-input-wrap">
+          <input type="text" class="glass-input quick-modal-col-input" 
+            data-col="${escapeHtml(header)}" 
+            value="${escapeHtml(currentVal)}" 
+            placeholder="Filtrar em ${escapeHtml(header)}...">
+          <button type="button" class="quick-filter-modal-clear-btn" title="Limpar" style="display: ${currentVal ? 'block' : 'none'};">&times;</button>
+        </div>
+      `;
+
+      const input = row.querySelector('.quick-modal-col-input');
+      const clearBtn = row.querySelector('.quick-filter-modal-clear-btn');
+
+      input.addEventListener('input', (e) => {
+        const val = e.target.value;
+        if (val) {
+          state.columnFilters[header] = val;
+          clearBtn.style.display = 'block';
+        } else {
+          delete state.columnFilters[header];
+          clearBtn.style.display = 'none';
+        }
+      });
+
+      clearBtn.addEventListener('click', () => {
+        input.value = '';
+        delete state.columnFilters[header];
+        clearBtn.style.display = 'none';
+        input.focus();
+      });
+
+      list.appendChild(row);
     });
   }
 

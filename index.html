@@ -184,26 +184,11 @@
           <span>Auto Fit</span>
         </button>
 
-        <button id="btnToggleQuickFilters" class="btn btn-sm" title="Exibir/ocultar barra de busca individual sob cada coluna">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <line x1="4" y1="21" x2="4" y2="14"></line>
-            <line x1="4" y1="10" x2="4" y2="3"></line>
-            <line x1="12" y1="21" x2="12" y2="12"></line>
-            <line x1="12" y1="8" x2="12" y2="3"></line>
-            <line x1="20" y1="21" x2="20" y2="16"></line>
-            <line x1="20" y1="12" x2="20" y2="3"></line>
-            <line x1="1" y1="14" x2="7" y2="14"></line>
-            <line x1="9" y1="8" x2="15" y2="8"></line>
-            <line x1="17" y1="16" x2="23" y2="16"></line>
-          </svg>
-          <span>Filtros Rápidos</span>
-        </button>
-
-        <button id="btnOpenAdvFilter" class="btn btn-sm" title="Construtor com múltiplos critérios e condições">
+        <button id="btnOpenFilterModal" class="btn btn-sm" title="Filtrar por colunas ou construir regras avançadas">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
           </svg>
-          <span>Filtros Avançados</span>
+          <span>Filtros</span>
           <span id="activeFilterBadge" class="filter-count-badge" style="display: none; padding: 1px 5px; font-size: 0.65rem;">0</span>
         </button>
 
@@ -375,39 +360,102 @@
 
   </div>
 
-  <!-- MODAL: Advanced Multi-Condition Filter -->
+  <!-- MODAL: Unified Filter Hub (Quick & Advanced Filters) -->
   <div id="modalAdvFilter" class="modal-overlay">
-    <div class="modal-content">
+    <div class="modal-content modal-filter-content">
       <div class="modal-header">
         <h3 class="modal-title">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
           </svg>
-          Construtor de Filtros Inteligentes
+          <span>Filtros</span>
         </h3>
         <button class="modal-close-btn" data-close="modalAdvFilter">&times;</button>
       </div>
       <div class="modal-body">
-        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; gap: 8px; flex-wrap: wrap;">
-          <div style="display: flex; align-items: center; gap: 8px;">
-            <span style="font-size: 0.82rem; color: var(--text-secondary);">Lógica dos filtros:</span>
-            <select id="selectFilterLogic" class="glass-select">
-              <option value="AND">TODAS as regras devem ser atendidas (E / AND)</option>
-              <option value="OR">QUALQUER regra atendida (OU / OR)</option>
-            </select>
-          </div>
-          <button id="btnAddFilterRule" class="btn btn-sm btn-primary">
-            <span>+ Adicionar Regra</span>
-          </button>
+        <!-- Filter Mode Selector (Segmented Radio Cards) -->
+        <div class="filter-mode-selector" role="radiogroup" aria-label="Tipo de Filtro">
+          <label class="filter-mode-card active" id="modeCardQuick">
+            <input type="radio" name="filterModeChoice" value="quick" checked class="filter-mode-radio">
+            <div class="filter-mode-content">
+              <div class="filter-mode-title">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <line x1="4" y1="21" x2="4" y2="14"></line>
+                  <line x1="4" y1="10" x2="4" y2="3"></line>
+                  <line x1="12" y1="21" x2="12" y2="12"></line>
+                  <line x1="12" y1="8" x2="12" y2="3"></line>
+                  <line x1="20" y1="21" x2="20" y2="16"></line>
+                  <line x1="20" y1="12" x2="20" y2="3"></line>
+                  <line x1="1" y1="14" x2="7" y2="14"></line>
+                  <line x1="9" y1="8" x2="15" y2="8"></line>
+                  <line x1="17" y1="16" x2="23" y2="16"></line>
+                </svg>
+                <span>Filtros Rápidos</span>
+              </div>
+              <div class="filter-mode-desc">Busca direta por coluna e barra rápida na tabela</div>
+            </div>
+          </label>
+
+          <label class="filter-mode-card" id="modeCardAdv">
+            <input type="radio" name="filterModeChoice" value="advanced" class="filter-mode-radio">
+            <div class="filter-mode-content">
+              <div class="filter-mode-title">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
+                </svg>
+                <span>Filtros Avançados</span>
+              </div>
+              <div class="filter-mode-desc">Múltiplas condições, operadores (E / OU), faixas e regex</div>
+            </div>
+          </label>
         </div>
 
-        <div id="filterRulesList" class="filter-rules-list">
-          <!-- Dynamic rule rows injected by app.js -->
+        <!-- TAB PANE: Quick Filters -->
+        <div id="filterTabQuick" class="filter-tab-pane">
+          <div class="quick-filter-table-toggle">
+            <label class="glass-checkbox-label">
+              <input type="checkbox" id="checkToggleQuickFiltersRow" class="glass-checkbox">
+              <span style="font-weight: 500;">Exibir linha de busca rápida no topo da tabela</span>
+            </label>
+            <span class="quick-filter-help-text">Adiciona uma linha de digitação sob o cabeçalho de cada coluna para filtrar instantaneamente.</span>
+          </div>
+
+          <div class="quick-filter-columns-header">
+            <span style="font-size: 0.82rem; font-weight: 600; color: var(--text-secondary);">Busca Direta por Coluna:</span>
+            <button id="btnClearQuickColFilters" class="btn btn-xs" type="button">Limpar buscas das colunas</button>
+          </div>
+
+          <div id="quickFiltersModalList" class="quick-filters-modal-list">
+            <!-- Populated dynamically with column search inputs -->
+          </div>
+        </div>
+
+        <!-- TAB PANE: Advanced Filters -->
+        <div id="filterTabAdvanced" class="filter-tab-pane" style="display: none;">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; gap: 8px; flex-wrap: wrap;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span style="font-size: 0.82rem; color: var(--text-secondary);">Lógica dos filtros:</span>
+              <select id="selectFilterLogic" class="glass-select">
+                <option value="AND">TODAS as regras devem ser atendidas (E / AND)</option>
+                <option value="OR">QUALQUER regra atendida (OU / OR)</option>
+              </select>
+            </div>
+            <button id="btnAddFilterRule" class="btn btn-sm btn-primary">
+              <span>+ Adicionar Regra</span>
+            </button>
+          </div>
+
+          <div id="filterRulesList" class="filter-rules-list">
+            <!-- Dynamic rule rows injected by app.js -->
+          </div>
         </div>
       </div>
       <div class="modal-footer">
         <button id="btnClearAllFilters" class="btn">Limpar Filtros</button>
-        <button id="btnApplyAdvFilters" class="btn btn-primary">Aplicar Filtros</button>
+        <div style="display: flex; gap: 8px; margin-left: auto;">
+          <button class="btn" data-close="modalAdvFilter">Fechar</button>
+          <button id="btnApplyAdvFilters" class="btn btn-primary">Aplicar Filtros</button>
+        </div>
       </div>
     </div>
   </div>

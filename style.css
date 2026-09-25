@@ -573,6 +573,13 @@ html, body {
   border-radius: var(--radius-sm);
 }
 
+.btn-xs {
+  height: 24px;
+  padding: 0 8px;
+  font-size: 0.72rem;
+  border-radius: var(--radius-xs);
+}
+
 /* Secondary Toolbar: Search, Filters, Metrics Bar (True Centered Grid) */
 .toolbar-panel {
   display: grid;
@@ -1929,6 +1936,190 @@ mark.search-highlight {
 .copy-mini-btn:hover {
   opacity: 1;
   color: var(--accent-primary);
+}
+
+/* ==========================================================================
+   Filter Hub Modal (Quick & Advanced Filters)
+   ========================================================================== */
+
+.modal-filter-content {
+  max-width: 680px;
+}
+
+.filter-mode-selector {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.filter-mode-card {
+  flex: 1;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: var(--radius-md);
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--glass-border);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  user-select: none;
+}
+
+.filter-mode-card:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.filter-mode-card.active,
+.filter-mode-card:has(input:checked) {
+  border-color: var(--accent-primary);
+  background: var(--accent-subtle);
+  box-shadow: 0 0 16px -4px var(--accent-glow);
+}
+
+.filter-mode-radio {
+  margin-top: 3px;
+  accent-color: var(--accent-primary);
+  cursor: pointer;
+}
+
+.filter-mode-content {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.filter-mode-title {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.filter-mode-card.active .filter-mode-title,
+.filter-mode-card:has(input:checked) .filter-mode-title {
+  color: var(--accent-primary);
+}
+
+.filter-mode-desc {
+  font-size: 0.74rem;
+  color: var(--text-muted);
+  line-height: 1.35;
+}
+
+/* Quick Filter Tab Pane */
+.quick-filter-table-toggle {
+  padding: 10px 14px;
+  border-radius: var(--radius-md);
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--glass-border);
+  margin-bottom: 14px;
+}
+
+.quick-filter-help-text {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-top: 4px;
+  margin-left: 22px;
+  line-height: 1.35;
+}
+
+.quick-filter-columns-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  padding: 0 2px;
+}
+
+.quick-filters-modal-list {
+  max-height: 270px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-right: 4px;
+}
+
+.quick-filter-modal-row {
+  display: grid;
+  grid-template-columns: 160px 1fr;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  border-radius: var(--radius-md);
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--glass-border);
+  transition: border-color var(--transition-fast);
+}
+
+.quick-filter-modal-row:hover {
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+.quick-filter-modal-col-name {
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--text-main);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.quick-filter-modal-col-badge {
+  font-size: 0.65rem;
+  padding: 1px 5px;
+  border-radius: var(--radius-xs);
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text-muted);
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.quick-filter-modal-input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.quick-filter-modal-input-wrap .glass-input {
+  width: 100%;
+  padding-right: 28px;
+}
+
+.quick-filter-modal-clear-btn {
+  position: absolute;
+  right: 6px;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 2px 4px;
+  font-size: 1rem;
+  line-height: 1;
+  border-radius: var(--radius-xs);
+  transition: color var(--transition-fast);
+}
+
+.quick-filter-modal-clear-btn:hover {
+  color: var(--neon-rose);
+}
+
+@media (max-width: 560px) {
+  .filter-mode-selector {
+    flex-direction: column;
+  }
+  .quick-filter-modal-row {
+    grid-template-columns: 1fr;
+    gap: 6px;
+  }
 }
 
 /* Advanced Filter Builder UI */

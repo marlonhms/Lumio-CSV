@@ -293,7 +293,83 @@ async function main() {
       throw new Error(`Excel browser verification failed: ${JSON.stringify(eb)}`);
     }
 
-    console.log('✔ Headless browser test (CSV, PWA & Excel Multi-Sheet) passed successfully!');
+    // Test 5: Unified Filter Hub In-Browser Verification
+    const filterHubBrowserTest = await send('Runtime.evaluate', {
+      expression: `
+        (function() {
+          const btnFilter = document.getElementById('btnOpenFilterModal');
+          const modal = document.getElementById('modalAdvFilter');
+          const badge = document.getElementById('activeFilterBadge');
+          if (!btnFilter || !modal) return { ok: false, reason: 'Filter button or modal missing' };
+
+          // 1. Open Filter Modal
+          btnFilter.click();
+          const opened = modal.classList.contains('open');
+
+          // 2. Check mode switching
+          const radAdv = document.querySelector('input[name="filterModeChoice"][value="advanced"]');
+          const radQuick = document.querySelector('input[name="filterModeChoice"][value="quick"]');
+          const tabQuick = document.getElementById('filterTabQuick');
+          const tabAdv = document.getElementById('filterTabAdvanced');
+
+          if (radAdv) {
+            radAdv.click();
+            radAdv.dispatchEvent(new Event('change'));
+          }
+          const advVisible = tabAdv && tabAdv.style.display !== 'none';
+
+          if (radQuick) {
+            radQuick.click();
+            radQuick.dispatchEvent(new Event('change'));
+          }
+          const quickVisible = tabQuick && tabQuick.style.display !== 'none';
+
+          // 3. Fill column filter for 'Cidade'
+          const cidadeInput = document.querySelector('.quick-modal-col-input[data-col="Cidade"]');
+          if (cidadeInput) {
+            cidadeInput.value = 'Curitiba';
+            cidadeInput.dispatchEvent(new Event('input'));
+          }
+
+          // 4. Apply Filters
+          const btnApply = document.getElementById('btnApplyAdvFilters');
+          if (btnApply) btnApply.click();
+
+          const closed = !modal.classList.contains('open');
+          const rowsAfterFilter = document.querySelectorAll('.data-table tbody tr');
+          const badgeCount = badge ? badge.textContent : '0';
+          const badgeVisible = badge && badge.style.display !== 'none';
+
+          // 5. Clear Filters
+          btnFilter.click();
+          const btnClear = document.getElementById('btnClearAllFilters');
+          if (btnClear) btnClear.click();
+          const rowsAfterClear = document.querySelectorAll('.data-table tbody tr');
+
+          return {
+            ok: true,
+            opened,
+            closed,
+            advVisible,
+            quickVisible,
+            hasCidadeInput: !!cidadeInput,
+            filteredRowCount: rowsAfterFilter.length,
+            badgeCount,
+            badgeVisible,
+            restoredRowCount: rowsAfterClear.length
+          };
+        })()
+      `,
+      returnByValue: true
+    });
+
+    console.log('Filter Hub browser test results:', filterHubBrowserTest.result.value);
+    const fb = filterHubBrowserTest.result.value;
+    if (!fb || !fb.ok || !fb.opened || !fb.closed || !fb.advVisible || !fb.quickVisible || fb.filteredRowCount !== 1 || !fb.badgeVisible || fb.badgeCount !== '1' || fb.restoredRowCount !== 2) {
+      throw new Error(`Filter Hub in-browser verification failed: ${JSON.stringify(fb)}`);
+    }
+
+    console.log('✔ Headless browser test (CSV, PWA, Excel & Unified Filter Hub) passed successfully!');
   } finally {
     if (ws && ws.readyState === 1) {
       try { ws.close(); } catch (e) {}
