@@ -11,6 +11,7 @@ const testSuites = [
   'test_excel_support.js',
   'test_vsync_and_theme_scrollbars.js',
   'test_filter_hub.js',
+  'test_encoding_and_accents.js',
   'test_in_browser.js'
 ];
 

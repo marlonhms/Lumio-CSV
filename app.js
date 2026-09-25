@@ -37,7 +37,7 @@
     isDirty: false,
     currentThemeIndex: 0,
     themes: ['neon', 'amethyst', 'emerald', 'solar'],
-    currentEncoding: 'utf-8',
+    currentEncoding: 'auto',
     isExcel: false,
     excelWorkbook: null,
     activeSheetName: null,
@@ -2181,20 +2181,27 @@ PED-1030;João Pedro Esteves;joao.esteves@email.com;02/03/2026;Hardware;Gabinete
       handleFileSelected(file);
     });
 
-    function readFileWithEncoding(file, encoding) {
+    function readFileWithEncoding(file, requestedEncoding = 'auto') {
       const reader = new FileReader();
       reader.onload = (evt) => {
         state.rawBuffer = evt.target.result;
-        try {
-          const decoder = new TextDecoder(encoding);
-          const decodedText = decoder.decode(state.rawBuffer);
-          loadCsvContent(decodedText, file.name);
-        } catch (err) {
-          // Fallback to UTF-8
-          const decoder = new TextDecoder('utf-8');
-          const decodedText = decoder.decode(state.rawBuffer);
-          loadCsvContent(decodedText, file.name);
+        const { text, encoding } = CsvEngine.detectAndDecodeBuffer(state.rawBuffer, requestedEncoding);
+        state.currentEncoding = encoding;
+
+        if (elements.selectEncoding) {
+          elements.selectEncoding.value = encoding;
         }
+
+        loadCsvContent(text, file.name);
+
+        if (encoding === 'windows-1252') {
+          showToast('Codificação detectada: ANSI / Windows-1252 (Acentos preservados).');
+        } else if (encoding === 'utf-16le' || encoding === 'utf-16be') {
+          showToast(`Codificação detectada: ${encoding.toUpperCase()}.`);
+        }
+      };
+      reader.onerror = () => {
+        showToast('Erro ao ler arquivo do disco.');
       };
       reader.readAsArrayBuffer(file);
     }
@@ -2206,10 +2213,10 @@ PED-1030;João Pedro Esteves;joao.esteves@email.com;02/03/2026;Hardware;Gabinete
 
       if (state.rawBuffer && !state.isExcel) {
         try {
-          const decoder = new TextDecoder(encoding);
-          const decodedText = decoder.decode(state.rawBuffer);
-          loadCsvContent(decodedText, state.fileName, null, true);
-          showToast(`Arquivo decodificado com "${encoding.toUpperCase()}".`);
+          const { text, encoding: appliedEncoding } = CsvEngine.detectAndDecodeBuffer(state.rawBuffer, encoding);
+          state.currentEncoding = appliedEncoding;
+          loadCsvContent(text, state.fileName, null, true);
+          showToast(`Arquivo decodificado com "${appliedEncoding.toUpperCase()}".`);
         } catch (err) {
           showToast(`Erro ao aplicar codificação ${encoding}.`);
         }
@@ -2768,11 +2775,12 @@ PED-1030;João Pedro Esteves;joao.esteves@email.com;02/03/2026;Hardware;Gabinete
     });
 
     elements.btnProcessPaste.addEventListener('click', () => {
-      const text = elements.pasteTextarea.value.trim();
-      if (!text) {
+      const rawText = elements.pasteTextarea.value.trim();
+      if (!rawText) {
         showToast('Por favor, cole algum texto antes de processar.');
         return;
       }
+      const text = CsvEngine.cleanText ? CsvEngine.cleanText(rawText) : rawText;
       closeModal('modalPaste');
       loadCsvContent(text, 'dados_colados.csv');
     });

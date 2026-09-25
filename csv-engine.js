@@ -20,6 +20,120 @@
   const CANDIDATE_DELIMITERS = [',', ';', '\t', '|'];
 
   /**
+   * Intelligently repair Mojibake (e.g. UTF-8 misinterpreted as Latin1)
+   * and broken replacement characters (\uFFFD / ) for clean textualization
+   */
+  function cleanText(text) {
+    if (!text || typeof text !== 'string') return text;
+
+    let cleaned = text;
+
+    // 1. Repair Mojibake (UTF-8 bytes misread as Latin1 / Windows-1252)
+    if (/[\u00c2\u00c3]/.test(cleaned)) {
+      try {
+        const bytes = new Uint8Array([...cleaned].map(c => c.charCodeAt(0) & 0xff));
+        const attempt = new TextDecoder('utf-8', { fatal: true }).decode(bytes);
+        if (!/[\u00c2\u00c3]/.test(attempt) || attempt.length < cleaned.length) {
+          cleaned = attempt;
+        }
+      } catch (e) {
+        // Safe Portuguese specific substitution fallback if binary decode failed on mixed text
+        cleaned = cleaned
+          .replace(/Ã£/g, 'ã').replace(/Ã§/g, 'ç').replace(/Ã¡/g, 'á')
+          .replace(/Ã©/g, 'é').replace(/Ã­/g, 'í').replace(/Ã³/g, 'ó')
+          .replace(/Ãº/g, 'ú').replace(/Ã¢/g, 'â').replace(/Ãª/g, 'ê')
+          .replace(/Ã´/g, 'ô').replace(/Ãµ/g, 'õ').replace(/Ã /g, 'à')
+          .replace(/Ãƒ/g, 'Ã').replace(/Ã‡/g, 'Ç').replace(/Ã/g, 'Á')
+          .replace(/Ã‰/g, 'É').replace(/Ã/g, 'Í').replace(/Ã“/g, 'Ó')
+          .replace(/Ãš/g, 'Ú').replace(/Ã‚/g, 'Â').replace(/ÃŠ/g, 'Ê')
+          .replace(/Ã”/g, 'Ô').replace(/Ã•/g, 'Õ').replace(/Ã€/g, 'À')
+          .replace(/Âº/g, 'º').replace(/Âª/g, 'ª').replace(/Â°/g, '°');
+      }
+    }
+
+    // 2. Repair damaged replacement characters (\uFFFD) for common Brazilian Portuguese patterns
+    if (cleaned.includes('\ufffd')) {
+      cleaned = cleaned
+        .replace(/(^|[;,\t\r\n"'\s])N\ufffdO([;,\t\r\n"'\s]|$)/g, '$1NÃO$2')
+        .replace(/(^|[;,\t\r\n"'\s])n\ufffdo([;,\t\r\n"'\s]|$)/g, '$1não$2')
+        .replace(/(^|[;,\t\r\n"'\s])N\ufffdo([;,\t\r\n"'\s]|$)/g, '$1Não$2')
+        .replace(/(^|[;,\t\r\n"'\s])N\ufffd([;,\t\r\n"'\s]|$)/g, '$1NÃO$2')
+        .replace(/(^|[;,\t\r\n"'\s])n\ufffd([;,\t\r\n"'\s]|$)/g, '$1não$2')
+        .replace(/\bN\ufffdO\b/g, 'NÃO')
+        .replace(/\bn\ufffdo\b/g, 'não')
+        .replace(/\bN\ufffdo\b/g, 'Não')
+        .replace(/\bPRE\ufffdO\b/g, 'PREÇO')
+        .replace(/\bPre\ufffdo\b/g, 'Preço')
+        .replace(/\bpre\ufffdo\b/g, 'preço')
+        .replace(/\bSITUA\ufffd\ufffdO\b/gi, (m) => m === m.toUpperCase() ? 'SITUAÇÃO' : 'Situação')
+        .replace(/\bDESCRI\ufffd\ufffdO\b/gi, (m) => m === m.toUpperCase() ? 'DESCRIÇÃO' : 'Descrição')
+        .replace(/\bINFORMA\ufffd\ufffdO\b/gi, (m) => m === m.toUpperCase() ? 'INFORMAÇÃO' : 'Informação')
+        .replace(/\bATEN\ufffd\ufffdO\b/gi, (m) => m === m.toUpperCase() ? 'ATENÇÃO' : 'Atenção')
+        .replace(/\bCONCLU\ufffdDO\b/gi, (m) => m === m.toUpperCase() ? 'CONCLUÍDO' : 'Concluído')
+        .replace(/\bP\ufffdGINA\b/gi, (m) => m === m.toUpperCase() ? 'PÁGINA' : 'Página')
+        .replace(/\bM\ufffdS\b/gi, (m) => m === m.toUpperCase() ? 'MÊS' : 'Mês');
+    }
+
+    return cleaned;
+  }
+
+  /**
+   * Automatically detect encoding from buffer and decode into clean string
+   */
+  function detectAndDecodeBuffer(inputBuffer, preferredEncoding = 'auto') {
+    if (!inputBuffer) return { text: '', encoding: 'utf-8' };
+
+    let bytes;
+    if (inputBuffer instanceof Uint8Array || (inputBuffer.buffer && inputBuffer.byteOffset !== undefined)) {
+      bytes = new Uint8Array(inputBuffer.buffer, inputBuffer.byteOffset, inputBuffer.byteLength);
+    } else {
+      bytes = new Uint8Array(inputBuffer);
+    }
+
+    // 1. Check Byte Order Marks (BOM)
+    if (bytes.length >= 3 && bytes[0] === 0xEF && bytes[1] === 0xBB && bytes[2] === 0xBF) {
+      const decoder = new TextDecoder('utf-8');
+      return { text: cleanText(decoder.decode(bytes)), encoding: 'utf-8' };
+    }
+    if (bytes.length >= 2 && bytes[0] === 0xFF && bytes[1] === 0xFE) {
+      const decoder = new TextDecoder('utf-16le');
+      return { text: cleanText(decoder.decode(bytes)), encoding: 'utf-16le' };
+    }
+    if (bytes.length >= 2 && bytes[0] === 0xFE && bytes[1] === 0xFF) {
+      const decoder = new TextDecoder('utf-16be');
+      return { text: cleanText(decoder.decode(bytes)), encoding: 'utf-16be' };
+    }
+
+    // 2. User explicitly requested a specific encoding (not 'auto')
+    if (preferredEncoding && preferredEncoding !== 'auto') {
+      try {
+        const decoder = new TextDecoder(preferredEncoding);
+        return { text: cleanText(decoder.decode(bytes)), encoding: preferredEncoding };
+      } catch (e) {
+        // Fallback to auto
+      }
+    }
+
+    // 3. Strict UTF-8 trial
+    try {
+      const utf8Decoder = new TextDecoder('utf-8', { fatal: true });
+      const decodedUtf8 = utf8Decoder.decode(bytes);
+      return { text: cleanText(decodedUtf8), encoding: 'utf-8' };
+    } catch (errUtf8) {
+      // Strict UTF-8 failed: invalid byte sequences for UTF-8 (e.g. 0xC3 followed by 0x4F as in NÃO)
+      // Decode with Windows-1252 (covers standard Windows ANSI, ISO-8859-1, Latin-1)
+      try {
+        const winDecoder = new TextDecoder('windows-1252');
+        const decodedWin = winDecoder.decode(bytes);
+        return { text: cleanText(decodedWin), encoding: 'windows-1252' };
+      } catch (errWin) {
+        const fallbackDecoder = new TextDecoder('utf-8');
+        return { text: cleanText(fallbackDecoder.decode(bytes)), encoding: 'utf-8' };
+      }
+    }
+  }
+
+  /**
    * Sniff the most likely delimiter from CSV text
    * Uses frequency consistency across lines outside quotes
    */
@@ -27,8 +141,8 @@
     if (!text || typeof text !== 'string') return ',';
 
     // Remove BOM if present
-    const cleanText = text.charCodeAt(0) === 0xFEFF ? text.slice(1) : text;
-    const sample = cleanText.slice(0, 32768); // sample first 32KB
+    const noBomText = text.charCodeAt(0) === 0xFEFF ? text.slice(1) : text;
+    const sample = noBomText.slice(0, 32768); // sample first 32KB
 
     const counts = {};
     candidateDelimiters.forEach(d => { counts[d] = []; });
@@ -142,6 +256,7 @@
       trimFields: options.trimFields !== false,
       skipEmptyLines: options.skipEmptyLines !== false,
       dynamicTyping: options.dynamicTyping === true,
+      cleanText: options.cleanText !== false,
       ...options
     };
 
@@ -158,8 +273,9 @@
       };
     }
 
-    // Remove BOM
-    const content = text.charCodeAt(0) === 0xFEFF ? text.slice(1) : text;
+    // Remove BOM and clean text if requested
+    const rawNoBom = text.charCodeAt(0) === 0xFEFF ? text.slice(1) : text;
+    const content = opts.cleanText !== false ? cleanText(rawNoBom) : rawNoBom;
 
     // Auto-detect delimiter if not specified
     const delimiter = opts.delimiter || sniffDelimiter(content);
@@ -987,6 +1103,8 @@
     sortData,
     toCSV,
     toJSON,
-    toMarkdown
+    toMarkdown,
+    cleanText,
+    detectAndDecodeBuffer
   };
 }));

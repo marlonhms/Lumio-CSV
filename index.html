@@ -347,10 +347,12 @@
             </select>
 
             <span style="margin-left: 8px;">Codificação:</span>
-            <select id="selectEncoding" class="glass-select" title="Alterar decodificação do texto para corrigir acentos">
-              <option value="utf-8" selected>UTF-8</option>
+            <select id="selectEncoding" class="glass-select" title="Detecção automática ou alteração de codificação para corrigir acentos">
+              <option value="auto" selected>Auto (Detectar)</option>
+              <option value="utf-8">UTF-8</option>
               <option value="windows-1252">Windows-1252 (ANSI / Latin 1)</option>
               <option value="iso-8859-1">ISO-8859-1</option>
+              <option value="utf-16le">UTF-16 LE</option>
             </select>
           </div>
         </footer>

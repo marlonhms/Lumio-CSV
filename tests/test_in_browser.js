@@ -369,7 +369,45 @@ async function main() {
       throw new Error(`Filter Hub in-browser verification failed: ${JSON.stringify(fb)}`);
     }
 
-    console.log('✔ Headless browser test (CSV, PWA, Excel & Unified Filter Hub) passed successfully!');
+    // Test 6: Windows-1252 & Portuguese Accents In-Browser Verification
+    const pistaBuf = fs.readFileSync(path.join(ROOT, 'docs/CONFIGPISTA.csv'));
+    const pistaB64 = pistaBuf.toString('base64');
+
+    const encodingBrowserTest = await send('Runtime.evaluate', {
+      expression: `
+        (function() {
+          const b64 = ${JSON.stringify(pistaB64)};
+          const binaryString = atob(b64);
+          const bytes = new Uint8Array(binaryString.length);
+          for (let i = 0; i < binaryString.length; i++) {
+            bytes[i] = binaryString.charCodeAt(i);
+          }
+
+          const { text, encoding } = CsvEngine.detectAndDecodeBuffer(bytes.buffer);
+          const parseResult = CsvEngine.parse(text);
+          const hasNao = parseResult.data.some(r => r.Coluna_2 === 'NÃO');
+          const hasBroken = parseResult.data.some(r => (r.Coluna_2 || '').includes('\\ufffd'));
+          const charrua = parseResult.data.find(r => r.AME_CLIENT_ID === 'CHARRUA_ATIVO');
+
+          return {
+            detectedEncoding: encoding,
+            hasNao,
+            hasBroken,
+            charruaValue: charrua ? charrua.Coluna_2 : null,
+            totalRows: parseResult.data.length
+          };
+        })()
+      `,
+      returnByValue: true
+    });
+
+    console.log('Encoding browser test results:', encodingBrowserTest.result.value);
+    const ebTest = encodingBrowserTest.result.value;
+    if (!ebTest || ebTest.detectedEncoding !== 'windows-1252' || !ebTest.hasNao || ebTest.hasBroken || ebTest.charruaValue !== 'NÃO') {
+      throw new Error(`Encoding & accents browser verification failed: ${JSON.stringify(ebTest)}`);
+    }
+
+    console.log('✔ Headless browser test (CSV, PWA, Excel, Filter Hub & Accents) passed successfully!');
   } finally {
     if (ws && ws.readyState === 1) {
       try { ws.close(); } catch (e) {}
