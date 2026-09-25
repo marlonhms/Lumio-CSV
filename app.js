@@ -2475,17 +2475,83 @@ PED-1030;João Pedro Esteves;joao.esteves@email.com;02/03/2026;Hardware;Gabinete
       }
     });
 
-    // Fast scroll FPS unlock & hover style isolation
-    let scrollEndTimer = null;
-    elements.tableScrollArea.addEventListener('scroll', () => {
-      if (!elements.tableScrollArea.classList.contains('is-scrolling')) {
-        elements.tableScrollArea.classList.add('is-scrolling');
+    /**
+     * Ultra-Fluid 120Hz/144Hz Kinetic Smooth Scrolling Engine
+     * Eliminates coarse 100px stepped jumps of standard mouse wheels,
+     * rendering sub-pixel interpolated displacement on every frame synced to V-Sync.
+     */
+    function initSmoothTableScroll() {
+      const el = elements.tableScrollArea;
+      if (!el) return;
+
+      let targetY = el.scrollTop;
+      let targetX = el.scrollLeft;
+      let isAnimating = false;
+      let rafId = null;
+
+      el.addEventListener('wheel', (e) => {
+        if (e.ctrlKey) return; // Allow browser zoom
+
+        let dy = e.shiftKey ? 0 : e.deltaY;
+        let dx = e.shiftKey ? e.deltaY : e.deltaX;
+
+        if (e.deltaMode === 1) { // Standard mouse wheel notch
+          dy *= 34;
+          dx *= 34;
+        } else if (e.deltaMode === 2) { // Page scroll
+          dy *= el.clientHeight * 0.85;
+          dx *= el.clientWidth * 0.85;
+        }
+
+        if (dy === 0 && dx === 0) return;
+
+        e.preventDefault();
+
+        const maxY = Math.max(0, el.scrollHeight - el.clientHeight);
+        const maxX = Math.max(0, el.scrollWidth - el.clientWidth);
+
+        targetY = Math.max(0, Math.min(maxY, targetY + dy));
+        targetX = Math.max(0, Math.min(maxX, targetX + dx));
+
+        state.vsync.lastInteraction = performance.now();
+
+        if (!isAnimating) {
+          isAnimating = true;
+          rafId = requestAnimationFrame(smoothTick);
+        }
+      }, { passive: false });
+
+      function smoothTick() {
+        if (!isAnimating) return;
+
+        const currY = el.scrollTop;
+        const currX = el.scrollLeft;
+        const diffY = targetY - currY;
+        const diffX = targetX - currX;
+
+        if (Math.abs(diffY) > 0.4 || Math.abs(diffX) > 0.4) {
+          const stepY = Math.abs(diffY) < 1.5 ? diffY : diffY * 0.24;
+          const stepX = Math.abs(diffX) < 1.5 ? diffX : diffX * 0.24;
+          el.scrollTop = currY + stepY;
+          el.scrollLeft = currX + stepX;
+          state.vsync.lastInteraction = performance.now();
+          rafId = requestAnimationFrame(smoothTick);
+        } else {
+          el.scrollTop = targetY;
+          el.scrollLeft = targetX;
+          isAnimating = false;
+        }
       }
-      clearTimeout(scrollEndTimer);
-      scrollEndTimer = setTimeout(() => {
-        elements.tableScrollArea.classList.remove('is-scrolling');
-      }, 100);
-    }, { passive: true });
+
+      el.addEventListener('scroll', () => {
+        if (!isAnimating) {
+          targetY = el.scrollTop;
+          targetX = el.scrollLeft;
+        }
+      }, { passive: true });
+    }
+
+    initSmoothTableScroll();
 
     // Start Real-Time FPS Telemetry
     initFpsMonitor();

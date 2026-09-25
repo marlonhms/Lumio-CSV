@@ -70,7 +70,7 @@ if ($DefaultBrowser -or ($null -eq $BrowserExe)) {
     # Standalone App Window Mode (Frameless, clean native desktop look)
     $FileUri = "file:///" + ($IndexHtml -replace "\\", "/")
     $Shortcut.TargetPath = $BrowserExe
-    $Shortcut.Arguments = "--app=""$FileUri"" --disable-frame-rate-limit --enable-gpu-rasterization --enable-zero-copy --ignore-gpu-blocklist --disable-features=UseEcoQoSForBackgroundProcess"
+    $Shortcut.Arguments = "--app=""$FileUri"" --disable-frame-rate-limit --enable-smooth-scrolling --enable-gpu-rasterization --enable-zero-copy --ignore-gpu-blocklist --disable-features=UseEcoQoSForBackgroundProcess"
     $Shortcut.WorkingDirectory = $ProjectDir
     $Shortcut.Description = "Lumio CSV - Visualizador & Editor de CSV Ultraleve"
     if (Test-Path $IconFile) {

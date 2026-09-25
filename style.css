@@ -906,9 +906,7 @@ html, body {
   overflow: hidden;
   border-radius: var(--radius-lg);
   border: 1px solid var(--glass-border);
-  background: rgba(11, 15, 23, 0.7);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  background: rgba(11, 15, 23, 0.94);
   box-shadow: var(--glass-specular), 0 12px 35px -5px rgba(0, 0, 0, 0.5);
   position: relative;
 }
@@ -920,6 +918,7 @@ html, body {
   position: relative;
   overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
+  will-change: scroll-position;
   scrollbar-color: var(--sb-color-thumb) rgba(6, 10, 18, 0.85);
 }
 
@@ -1091,14 +1090,12 @@ body::-webkit-scrollbar-thumb:hover {
   box-sizing: border-box;
 }
 
-/* Sticky Header with Frost Blur */
+/* Sticky Header with Fast GPU Composition (No Blur Thrashing) */
 .data-table thead tr:first-child th {
   position: sticky;
   top: 0;
   z-index: 10;
-  background: rgba(18, 24, 38, 0.96);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
+  background: #111726;
   border-bottom: 1px solid rgba(255, 255, 255, 0.12);
   padding: 8px 10px;
   color: var(--text-main);
@@ -1107,7 +1104,6 @@ body::-webkit-scrollbar-thumb:hover {
   user-select: none;
   box-sizing: border-box;
   overflow: visible;
-  transition: background var(--transition-fast);
 }
 
 .data-table thead tr:first-child th:hover {
@@ -1241,8 +1237,7 @@ body.is-resizing * {
   position: sticky;
   top: 37px; /* below top header */
   z-index: 9;
-  background: rgba(15, 20, 32, 0.95);
-  backdrop-filter: blur(16px);
+  background: #0f1422;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   padding: 4px 6px;
   box-sizing: border-box;
@@ -1345,9 +1340,7 @@ body.is-resizing * {
   display: flex;
   align-items: center;
   gap: 2px;
-  background: rgba(18, 24, 38, 0.95);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  background: #161e30;
   padding: 2px 4px;
   border-radius: var(--radius-xs);
   border: 1px solid rgba(255, 255, 255, 0.12);
@@ -1400,20 +1393,20 @@ body.is-resizing * {
   padding: 6px 0 !important;
   text-align: center !important;
   box-sizing: border-box !important;
-  background: rgba(14, 18, 28, 0.96);
+  background: #0e1320;
   border-right: 1px solid var(--glass-border);
 }
 
 .data-table thead tr:first-child th.col-select {
   top: 0;
   z-index: 25;
-  background: rgba(18, 24, 38, 0.98);
+  background: #111726;
 }
 
 .data-table thead tr.filter-header-row th.col-select {
   top: 36px;
   z-index: 24;
-  background: rgba(15, 20, 32, 0.98);
+  background: #0f1422;
 }
 
 .data-table tbody td.col-select {
@@ -1433,20 +1426,20 @@ body.is-resizing * {
   color: var(--text-dim) !important;
   font-family: var(--font-mono);
   font-size: 0.76rem;
-  background: rgba(14, 18, 28, 0.96);
+  background: #0e1320;
   border-right: 1px solid var(--glass-border);
 }
 
 .data-table thead tr:first-child th.col-index {
   top: 0;
   z-index: 25;
-  background: rgba(18, 24, 38, 0.98);
+  background: #111726;
 }
 
 .data-table thead tr.filter-header-row th.col-index {
   top: 36px;
   z-index: 24;
-  background: rgba(15, 20, 32, 0.98);
+  background: #0f1422;
 }
 
 .data-table tbody td.col-index {
@@ -1456,12 +1449,12 @@ body.is-resizing * {
 /* Hover and selected row states for sticky columns */
 .data-table tbody tr:hover td.col-select,
 .data-table tbody tr:hover td.col-index {
-  background: rgba(22, 28, 42, 0.98);
+  background: #161e30;
 }
 
 .data-table tbody tr.row-selected td.col-select,
 .data-table tbody tr.row-selected td.col-index {
-  background: rgba(18, 32, 48, 0.98);
+  background: #122135;
 }
 
 /* Custom Checkbox */
@@ -1500,7 +1493,6 @@ body.is-resizing * {
 /* Rows & Cells */
 .data-table tbody tr {
   border-bottom: 1px solid rgba(255, 255, 255, 0.035);
-  transition: background var(--transition-fast);
 }
 
 .data-table tbody tr:nth-child(even) {
