@@ -2475,7 +2475,149 @@ PED-1030;João Pedro Esteves;joao.esteves@email.com;02/03/2026;Hardware;Gabinete
       }
     });
 
+    /**
+     * Ultra-Fluid 120Hz/144Hz Kinetic Smooth Scrolling Engine
+     * Delivers silky smooth 120Hz/144Hz momentum gliding for mouse wheel scrolling,
+     * while completely yielding 100% control to native drag when the user interacts
+     * with the scrollbars, preventing any boundary rubber-banding or edge bouncing.
+     */
+    function initSmoothTableScroll() {
+      const el = elements.tableScrollArea;
+      if (!el) return;
 
+      let targetY = el.scrollTop;
+      let targetX = el.scrollLeft;
+      let isAnimating = false;
+      let isUserDragging = false;
+      let rafId = null;
+      let prevActualY = -1;
+      let prevActualX = -1;
+      let stallCount = 0;
+
+      function stopAnimation() {
+        if (rafId) {
+          cancelAnimationFrame(rafId);
+          rafId = null;
+        }
+        isAnimating = false;
+        stallCount = 0;
+        prevActualY = -1;
+        prevActualX = -1;
+      }
+
+      // When user presses mouse button (e.g. to grab scrollbar), immediately stop all wheel animation
+      window.addEventListener('mousedown', () => {
+        isUserDragging = true;
+        stopAnimation();
+        targetY = el.scrollTop;
+        targetX = el.scrollLeft;
+      }, { capture: true, passive: true });
+
+      window.addEventListener('mouseup', () => {
+        isUserDragging = false;
+        targetY = el.scrollTop;
+        targetX = el.scrollLeft;
+      }, { capture: true, passive: true });
+
+      // Synchronize positions whenever scroll position changes natively
+      el.addEventListener('scroll', () => {
+        if (!isAnimating || isUserDragging) {
+          targetY = el.scrollTop;
+          targetX = el.scrollLeft;
+        }
+      }, { passive: true });
+
+      // Smooth kinetic wheel scrolling
+      el.addEventListener('wheel', (e) => {
+        // Allow browser zoom (Ctrl+Wheel)
+        if (e.ctrlKey) return;
+
+        // If user is actively dragging scrollbar with mouse button held, do not interfere
+        if (isUserDragging) return;
+
+        let dy = e.shiftKey ? 0 : e.deltaY;
+        let dx = e.shiftKey ? e.deltaY : e.deltaX;
+
+        // Normalize delta across line vs pixel vs page modes
+        if (e.deltaMode === 1) { // Lines mode
+          dy *= 34;
+          dx *= 34;
+        } else if (e.deltaMode === 2) { // Pages mode
+          dy *= el.clientHeight * 0.85;
+          dx *= el.clientWidth * 0.85;
+        }
+
+        if (dy === 0 && dx === 0) return;
+
+        e.preventDefault();
+
+        // Recalculate current boundaries dynamically
+        const maxScrollY = Math.max(0, el.scrollHeight - el.clientHeight);
+        const maxScrollX = Math.max(0, el.scrollWidth - el.clientWidth);
+
+        // Clamp target strictly within valid boundaries
+        targetY = Math.max(0, Math.min(maxScrollY, targetY + dy));
+        targetX = Math.max(0, Math.min(maxScrollX, targetX + dx));
+
+        state.vsync.lastInteraction = performance.now();
+
+        if (!isAnimating) {
+          isAnimating = true;
+          stallCount = 0;
+          prevActualY = el.scrollTop;
+          prevActualX = el.scrollLeft;
+          rafId = requestAnimationFrame(smoothTick);
+        }
+      }, { passive: false });
+
+      function smoothTick() {
+        if (!isAnimating || isUserDragging) {
+          stopAnimation();
+          return;
+        }
+
+        const currY = el.scrollTop;
+        const currX = el.scrollLeft;
+
+        // Wall detection: if the scroll position hit a physical boundary and didn't move for 2 frames
+        if (Math.abs(currY - prevActualY) < 0.2 && Math.abs(currX - prevActualX) < 0.2) {
+          stallCount++;
+          if (stallCount >= 2) {
+            stopAnimation();
+            targetY = currY;
+            targetX = currX;
+            return;
+          }
+        } else {
+          stallCount = 0;
+        }
+        prevActualY = currY;
+        prevActualX = currX;
+
+        const diffY = targetY - currY;
+        const diffX = targetX - currX;
+
+        // If close enough to target, finish cleanly
+        if (Math.abs(diffY) < 1.0 && Math.abs(diffX) < 1.0) {
+          el.scrollTop = targetY;
+          el.scrollLeft = targetX;
+          stopAnimation();
+          return;
+        }
+
+        // Kinetic lerp factor: 0.22 per frame gives silky smooth deceleration at 120Hz/144Hz
+        const stepY = Math.abs(diffY) < 2.0 ? diffY : diffY * 0.22;
+        const stepX = Math.abs(diffX) < 2.0 ? diffX : diffX * 0.22;
+
+        el.scrollTop = currY + stepY;
+        el.scrollLeft = currX + stepX;
+
+        state.vsync.lastInteraction = performance.now();
+        rafId = requestAnimationFrame(smoothTick);
+      }
+    }
+
+    initSmoothTableScroll();
 
     // Start Real-Time FPS Telemetry
     initFpsMonitor();
