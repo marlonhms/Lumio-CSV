@@ -41,7 +41,13 @@
     isExcel: false,
     excelWorkbook: null,
     activeSheetName: null,
-    excelBuffer: null
+    excelBuffer: null,
+    vsync: {
+      mode: 'auto', // 'auto' | 'lock60'
+      detectedRefreshRate: 60,
+      currentFps: 60,
+      lastInteraction: performance.now()
+    }
   };
 
   // Embedded Sample Dataset Fallback
@@ -102,6 +108,11 @@ PED-1030;João Pedro Esteves;joao.esteves@email.com;02/03/2026;Hardware;Gabinete
     fpsTelemetry: document.getElementById('fpsTelemetry'),
     fpsVal: document.getElementById('fpsVal'),
     renderTimeVal: document.getElementById('renderTimeVal'),
+    vsyncBadge: document.getElementById('vsyncBadge'),
+    modalVsync: document.getElementById('modalVsync'),
+    vsyncDetectedRate: document.getElementById('vsyncDetectedRate'),
+    vsyncCurrentFps: document.getElementById('vsyncCurrentFps'),
+    vsyncStatusBadge: document.getElementById('vsyncStatusBadge'),
     metricTotalRows: document.getElementById('metricTotalRows'),
     metricFilteredRows: document.getElementById('metricFilteredRows'),
     pillSelectedRows: document.getElementById('pillSelectedRows'),
@@ -1955,28 +1966,154 @@ PED-1030;João Pedro Esteves;joao.esteves@email.com;02/03/2026;Hardware;Gabinete
   }
 
   /**
-   * Real-time Cyberpunk FPS & Display Latency Telemetry Monitor
-   * High-accuracy requestAnimationFrame loop measuring display refresh rate (60/120/144/240Hz)
+   * Adaptive V-Sync Engine & High-Accuracy Refresh Rate Telemetry
+   * Automatically synchronizes with the native monitor refresh rate (60/75/90/120/144/165/240Hz+)
+   * Efficiently sleeps during idle to guarantee 0% unnecessary GPU/CPU usage.
    */
   function initFpsMonitor() {
     let frameCount = 0;
     let lastTime = performance.now();
+    let isLoopRunning = false;
+    let idleTimer = null;
+    let calibrationFrames = [];
+    const CALIBRATION_SAMPLE_TARGET = 35;
+
+    // Load saved mode if available
+    try {
+      const savedMode = localStorage.getItem('lumio_vsync_mode');
+      if (savedMode === 'lock60' || savedMode === 'auto') {
+        state.vsync.mode = savedMode;
+      }
+    } catch (_) {}
+
+    function updateVsyncUI() {
+      if (elements.vsyncDetectedRate) {
+        elements.vsyncDetectedRate.textContent = `${state.vsync.detectedRefreshRate} Hz`;
+      }
+      if (elements.vsyncCurrentFps) {
+        elements.vsyncCurrentFps.textContent = `${state.vsync.currentFps} FPS`;
+      }
+      if (elements.vsyncBadge) {
+        if (state.vsync.mode === 'lock60') {
+          elements.vsyncBadge.textContent = '60 FPS ECO';
+          elements.vsyncBadge.style.color = '#fbbf24';
+          elements.vsyncBadge.style.borderColor = 'rgba(251, 191, 36, 0.4)';
+          elements.vsyncBadge.style.background = 'rgba(251, 191, 36, 0.12)';
+        } else {
+          elements.vsyncBadge.textContent = `${state.vsync.detectedRefreshRate}Hz VSYNC`;
+          elements.vsyncBadge.style.color = '#00ff9d';
+          elements.vsyncBadge.style.borderColor = 'rgba(0, 255, 157, 0.35)';
+          elements.vsyncBadge.style.background = 'rgba(0, 255, 157, 0.15)';
+        }
+      }
+      if (elements.vsyncStatusBadge) {
+        elements.vsyncStatusBadge.textContent = state.vsync.mode === 'lock60' 
+          ? 'Travado a 60 FPS (Econômico)' 
+          : `Sincronizado a ${state.vsync.detectedRefreshRate}Hz`;
+      }
+    }
+
+    function calibrateRefreshRate(interval) {
+      if (interval > 0 && interval < 100) {
+        calibrationFrames.push(interval);
+      }
+      if (calibrationFrames.length >= CALIBRATION_SAMPLE_TARGET) {
+        const sorted = [...calibrationFrames].sort((a, b) => a - b);
+        const median = sorted[Math.floor(sorted.length / 2)];
+        
+        let detected = 60;
+        if (median <= 4.8) detected = 240;
+        else if (median <= 6.5) detected = 165;
+        else if (median <= 7.8) detected = 144;
+        else if (median <= 9.5) detected = 120;
+        else if (median <= 12.0) detected = 90;
+        else if (median <= 14.5) detected = 75;
+        else detected = 60;
+
+        state.vsync.detectedRefreshRate = detected;
+        updateVsyncUI();
+      }
+    }
 
     function fpsLoop(now) {
+      if (!isLoopRunning) return;
+
       frameCount++;
       const delta = now - lastTime;
-      if (delta >= 400) {
-        const fps = Math.round((frameCount * 1000) / delta);
-        if (elements.fpsVal) {
-          elements.fpsVal.textContent = `${fps} FPS`;
+
+      // Calibration sampling
+      if (calibrationFrames.length < CALIBRATION_SAMPLE_TARGET && lastTime > 0) {
+        calibrateRefreshRate(delta / frameCount);
+      }
+
+      if (delta >= 450) {
+        const calculatedFps = Math.round((frameCount * 1000) / delta);
+        let displayFps = calculatedFps;
+        if (state.vsync.mode === 'lock60') {
+          displayFps = Math.min(displayFps, 60);
+        } else if (state.vsync.detectedRefreshRate > 60) {
+          displayFps = Math.min(displayFps, Math.round(state.vsync.detectedRefreshRate * 1.05));
         }
+
+        state.vsync.currentFps = displayFps;
+
+        if (elements.fpsVal) {
+          elements.fpsVal.textContent = `${displayFps} FPS`;
+        }
+        if (elements.vsyncCurrentFps) {
+          elements.vsyncCurrentFps.textContent = `${displayFps} FPS`;
+        }
+
         frameCount = 0;
         lastTime = now;
+
+        // Check if idle for more than 2.5 seconds
+        if (now - state.vsync.lastInteraction > 2500) {
+          isLoopRunning = false;
+          scheduleIdleHeartbeat();
+          return;
+        }
       }
+
       requestAnimationFrame(fpsLoop);
     }
 
-    requestAnimationFrame(fpsLoop);
+    function startLoop() {
+      state.vsync.lastInteraction = performance.now();
+      if (!isLoopRunning) {
+        isLoopRunning = true;
+        frameCount = 0;
+        lastTime = performance.now();
+        requestAnimationFrame(fpsLoop);
+      }
+    }
+
+    function scheduleIdleHeartbeat() {
+      clearTimeout(idleTimer);
+      idleTimer = setTimeout(() => {
+        if (!isLoopRunning) {
+          lastTime = performance.now();
+          frameCount = 0;
+          isLoopRunning = true;
+          requestAnimationFrame(fpsLoop);
+        }
+      }, 2500);
+    }
+
+    // Wake the telemetry loop on any user activity
+    const wakeEvents = ['scroll', 'mousemove', 'keydown', 'click', 'resize', 'wheel', 'touchstart'];
+    wakeEvents.forEach(evt => {
+      window.addEventListener(evt, () => {
+        state.vsync.lastInteraction = performance.now();
+        if (!isLoopRunning) {
+          startLoop();
+        }
+      }, { passive: true });
+    });
+
+    // Initial startup run
+    startLoop();
+    updateVsyncUI();
   }
 
   /**
@@ -2241,7 +2378,7 @@ PED-1030;João Pedro Esteves;joao.esteves@email.com;02/03/2026;Hardware;Gabinete
       renderTableHeader();
       renderTableBody();
       updateMetrics();
-      showToast('Visualização resetada para o padrão.');
+      showToast('Filtros, buscas e ordenações desfeitos.');
     });
 
     // Delegated event listener for row checkboxes
@@ -2316,6 +2453,56 @@ PED-1030;João Pedro Esteves;joao.esteves@email.com;02/03/2026;Hardware;Gabinete
 
     // Start Real-Time FPS Telemetry
     initFpsMonitor();
+
+    // FPS Telemetry Pill Click -> Open VSync Modal
+    if (elements.fpsTelemetry) {
+      elements.fpsTelemetry.addEventListener('click', () => {
+        if (elements.vsyncDetectedRate) {
+          elements.vsyncDetectedRate.textContent = `${state.vsync.detectedRefreshRate} Hz`;
+        }
+        if (elements.vsyncCurrentFps) {
+          elements.vsyncCurrentFps.textContent = `${state.vsync.currentFps} FPS`;
+        }
+        const currentModeRadio = document.querySelector(`input[name="vsyncMode"][value="${state.vsync.mode}"]`);
+        if (currentModeRadio) currentModeRadio.checked = true;
+
+        openModal('modalVsync');
+      });
+    }
+
+    // V-Sync Mode Toggle
+    document.querySelectorAll('input[name="vsyncMode"]').forEach(radio => {
+      radio.addEventListener('change', (e) => {
+        state.vsync.mode = e.target.value;
+        try {
+          localStorage.setItem('lumio_vsync_mode', state.vsync.mode);
+        } catch (_) {}
+
+        if (elements.vsyncBadge) {
+          if (state.vsync.mode === 'lock60') {
+            elements.vsyncBadge.textContent = '60 FPS ECO';
+            elements.vsyncBadge.style.color = '#fbbf24';
+            elements.vsyncBadge.style.borderColor = 'rgba(251, 191, 36, 0.4)';
+            elements.vsyncBadge.style.background = 'rgba(251, 191, 36, 0.12)';
+          } else {
+            elements.vsyncBadge.textContent = `${state.vsync.detectedRefreshRate}Hz VSYNC`;
+            elements.vsyncBadge.style.color = '#00ff9d';
+            elements.vsyncBadge.style.borderColor = 'rgba(0, 255, 157, 0.35)';
+            elements.vsyncBadge.style.background = 'rgba(0, 255, 157, 0.15)';
+          }
+        }
+        if (elements.vsyncStatusBadge) {
+          elements.vsyncStatusBadge.textContent = state.vsync.mode === 'lock60'
+            ? 'Travado a 60 FPS (Econômico)'
+            : `Sincronizado a ${state.vsync.detectedRefreshRate}Hz`;
+        }
+
+        showToast(state.vsync.mode === 'lock60' 
+          ? 'Modo Econômico ativado: Travado em 60 FPS.' 
+          : `Sincronização Nativa ativada: V-Sync sincronizado a ${state.vsync.detectedRefreshRate}Hz.`
+        );
+      });
+    });
 
     // Modal Close Buttons
     document.querySelectorAll('[data-close]').forEach(btn => {

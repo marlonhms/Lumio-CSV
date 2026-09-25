@@ -9,6 +9,7 @@ const testSuites = [
   'test_app_deep_verification.js',
   'test_pwa_and_structure.js',
   'test_excel_support.js',
+  'test_vsync_and_theme_scrollbars.js',
   'test_in_browser.js'
 ];
 

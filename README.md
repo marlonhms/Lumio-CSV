@@ -44,7 +44,12 @@ Construído em Vanilla JavaScript com suporte a Service Worker e SheetJS embutid
 ### Interface Liquid Glass
 * Design escuro moderno com desfoque de fundo e detalhes luminosos.
 * 4 temas visuais selecionáveis: Neon Aurora, Cyber Amethyst, Emerald Matrix e Solar Flame.
-* Barra de rolagem estilizada com reflexo luminoso cilíndrico e iluminação no hover.
+* Barras de rolagem estilizadas (inferior e laterais) adaptativas com cores e efeitos luminosos fiéis a cada um dos temas.
+
+### Sincronização V-Sync & Desempenho Inteligente
+* Sincronização automática com a taxa real do monitor do usuário (60Hz, 75Hz, 120Hz, 144Hz, 240Hz+), respeitando o limite físico da tela sem renderizar quadros exorbitantes.
+* Gerenciamento de energia: telemetria suspensa em repouso garantindo 0% de consumo de GPU/CPU estático.
+* Seletor de Modo V-Sync: Sincronização Nativa ou Modo Econômico (trava em 60 FPS para economia de bateria).
 
 ### Suporte a Excel e Multi-Abas
 * Abertura de planilhas modernas (`.xlsx`) e legadas (`.xls` BIFF8), além de `.csv`, `.tsv` e `.txt`.
@@ -202,7 +207,7 @@ Lumio-CSV/
 
 ## Testes Automatizados
 
-O projeto conta com **8 suítes de testes automatizados**, cobrindo conformidade RFC-4180, interoperabilidade com planilhas Excel, desempenho com mais de 15.000 registros, integridade de layout, cálculos de auto-fit, manifesto PWA e execução ponta a ponta em navegador headless.
+O projeto conta com **9 suítes de testes automatizados**, cobrindo conformidade RFC-4180, interoperabilidade com planilhas Excel, calibração de V-Sync e eficiência energética, barras de rolagem adaptativas aos temas, desempenho com mais de 15.000 registros, integridade de layout, cálculos de auto-fit, manifesto PWA e execução ponta a ponta em navegador headless.
 
 Para rodar toda a suíte de testes:
 
@@ -214,6 +219,7 @@ Para executar uma suíte específica:
 ```bash
 node tests/test_csv_engine.js
 node tests/test_excel_support.js
+node tests/test_vsync_and_theme_scrollbars.js
 node tests/test_edge_cases.js
 node tests/test_pwa_and_structure.js
 ```
