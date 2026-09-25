@@ -45,6 +45,10 @@ assert.ok(indexHtml.includes('id="modalVsync"'), 'index.html must have modalVsyn
 assert.ok(indexHtml.includes('id="vsyncDetectedRate"'), 'modalVsync must display vsyncDetectedRate');
 assert.ok(indexHtml.includes('id="vsyncCurrentFps"'), 'modalVsync must display vsyncCurrentFps');
 assert.ok(indexHtml.includes('name="vsyncMode"'), 'modalVsync must contain vsyncMode radio options');
+assert.ok(indexHtml.includes('value="lock120"'), 'modalVsync must have 120 FPS target option');
+assert.ok(indexHtml.includes('value="lock144"'), 'modalVsync must have 144 FPS target option');
+assert.ok(indexHtml.includes('value="auto"'), 'modalVsync must have Auto V-Sync option');
+assert.ok(indexHtml.includes('value="lock60"'), 'modalVsync must have 60 FPS Eco option');
 console.log('✔ V-Sync UI elements verified');
 
 // Test 4: V-Sync engine & idle power-saving in app.js
@@ -53,6 +57,8 @@ assert.ok(appJs.includes('calibrateRefreshRate('), 'app.js must implement refres
 assert.ok(appJs.includes('scheduleIdleHeartbeat('), 'app.js must implement idle heartbeat for zero CPU/GPU at rest');
 assert.ok(appJs.includes('vsyncMode'), 'app.js must handle vsyncMode selection');
 assert.ok(appJs.includes('modalVsync'), 'app.js must handle modalVsync opening');
+assert.ok(appJs.includes('lock120'), 'app.js must support lock120 mode');
+assert.ok(appJs.includes('lock144'), 'app.js must support lock144 mode');
 console.log('✔ V-Sync engine and idle power-saving logic verified');
 
 // Test 5: Launcher scripts GPU unlock arguments
@@ -60,13 +66,13 @@ console.log('Test 5: Verifying V-Sync unlock flags in Windows launch scripts...'
 assert.ok(lumioVbs.includes('--enable-gpu-rasterization'), 'Lumio CSV.vbs must include GPU rasterization');
 assert.ok(lumioVbs.includes('--enable-zero-copy'), 'Lumio CSV.vbs must include zero-copy');
 assert.ok(lumioVbs.includes('--disable-features=UseEcoQoSForBackgroundProcess'), 'Lumio CSV.vbs must disable EcoQoS throttle');
-assert.ok(!lumioVbs.includes('--disable-frame-rate-limit'), 'Lumio CSV.vbs must NOT disable frame rate limit (must respect V-Sync)');
+assert.ok(lumioVbs.includes('--disable-frame-rate-limit'), 'Lumio CSV.vbs must include --disable-frame-rate-limit to unlock 120Hz/144Hz+ monitors');
 
 assert.ok(shortcutVbs.includes('--enable-gpu-rasterization'), 'criar_atalho_desktop.vbs must include GPU rasterization');
-assert.ok(!shortcutVbs.includes('--disable-frame-rate-limit'), 'criar_atalho_desktop.vbs must respect V-Sync');
+assert.ok(shortcutVbs.includes('--disable-frame-rate-limit'), 'criar_atalho_desktop.vbs must include --disable-frame-rate-limit');
 
 assert.ok(shortcutPs1.includes('--enable-gpu-rasterization'), 'criar_atalho_desktop.ps1 must include GPU rasterization');
-assert.ok(!shortcutPs1.includes('--disable-frame-rate-limit'), 'criar_atalho_desktop.ps1 must respect V-Sync');
+assert.ok(shortcutPs1.includes('--disable-frame-rate-limit'), 'criar_atalho_desktop.ps1 must include --disable-frame-rate-limit');
 console.log('✔ Launcher scripts GPU & V-Sync arguments verified');
 
 console.log('=== ALL VSYNC & THEME SCROLLBAR TESTS PASSED! ===');

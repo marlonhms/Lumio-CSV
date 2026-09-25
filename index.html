@@ -670,20 +670,34 @@
         </div>
 
         <div style="margin-bottom: 16px;">
-          <label style="display: block; font-size: 0.85rem; font-weight: 500; margin-bottom: 8px;">Modo de Sincronização:</label>
+          <label style="display: block; font-size: 0.85rem; font-weight: 500; margin-bottom: 8px;">Meta de Taxa de Quadros (FPS):</label>
           <div class="vsync-options-group" style="display: flex; flex-direction: column; gap: 10px;">
             <label class="vsync-option-card">
-              <input type="radio" name="vsyncMode" value="auto" checked>
+              <input type="radio" name="vsyncMode" value="lock120" checked>
+              <div class="vsync-option-info">
+                <strong>120 FPS (Alta Fluidez Balanceada — Recomendado)</strong>
+                <p>Fluidez consistente a 120 FPS para monitores gamer de 120Hz/144Hz, sem sobrecarga excessiva de renderização.</p>
+              </div>
+            </label>
+            <label class="vsync-option-card">
+              <input type="radio" name="vsyncMode" value="lock144">
+              <div class="vsync-option-info">
+                <strong>144 FPS / 145 FPS (Fluidez Máxima)</strong>
+                <p>Atinge o teto nativo máximo de monitores gamer de 144Hz a 165Hz com renderização ultrarrápida.</p>
+              </div>
+            </label>
+            <label class="vsync-option-card">
+              <input type="radio" name="vsyncMode" value="auto">
               <div class="vsync-option-info">
                 <strong>Sincronização Nativa (Auto V-Sync)</strong>
-                <p>Destrava a fluidez para a taxa real do seu monitor (60Hz, 75Hz, 120Hz, 144Hz, 240Hz+) sem forçar quadros exacerbados além do que a tela suporta.</p>
+                <p>Detecta e sincroniza automaticamente com a taxa física do monitor conectado.</p>
               </div>
             </label>
             <label class="vsync-option-card">
               <input type="radio" name="vsyncMode" value="lock60">
               <div class="vsync-option-info">
-                <strong>Modo Econômico (Travar em 60 FPS)</strong>
-                <p>Limita a renderização a 60 FPS mesmo em telas de 120Hz/144Hz para máxima economia de energia em notebooks e eficiência térmica.</p>
+                <strong>60 FPS (Modo Econômico / Bateria)</strong>
+                <p>Limita a renderização a 60 FPS para máxima economia de bateria em notebooks e eficiência térmica.</p>
               </div>
             </label>
           </div>

@@ -43,7 +43,7 @@
     activeSheetName: null,
     excelBuffer: null,
     vsync: {
-      mode: 'auto', // 'auto' | 'lock60'
+      mode: 'lock120', // 'lock120' | 'lock144' | 'auto' | 'lock60'
       detectedRefreshRate: 60,
       currentFps: 60,
       lastInteraction: performance.now()
@@ -1973,6 +1973,7 @@ PED-1030;João Pedro Esteves;joao.esteves@email.com;02/03/2026;Hardware;Gabinete
   function initFpsMonitor() {
     let frameCount = 0;
     let lastTime = performance.now();
+    let prevFrameTime = 0;
     let isLoopRunning = false;
     let idleTimer = null;
     let calibrationFrames = [];
@@ -1981,7 +1982,7 @@ PED-1030;João Pedro Esteves;joao.esteves@email.com;02/03/2026;Hardware;Gabinete
     // Load saved mode if available
     try {
       const savedMode = localStorage.getItem('lumio_vsync_mode');
-      if (savedMode === 'lock60' || savedMode === 'auto') {
+      if (savedMode === 'lock120' || savedMode === 'lock144' || savedMode === 'auto' || savedMode === 'lock60') {
         state.vsync.mode = savedMode;
       }
     } catch (_) {}
@@ -1999,6 +2000,16 @@ PED-1030;João Pedro Esteves;joao.esteves@email.com;02/03/2026;Hardware;Gabinete
           elements.vsyncBadge.style.color = '#fbbf24';
           elements.vsyncBadge.style.borderColor = 'rgba(251, 191, 36, 0.4)';
           elements.vsyncBadge.style.background = 'rgba(251, 191, 36, 0.12)';
+        } else if (state.vsync.mode === 'lock120') {
+          elements.vsyncBadge.textContent = '120 FPS FLUIDO';
+          elements.vsyncBadge.style.color = '#00f0ff';
+          elements.vsyncBadge.style.borderColor = 'rgba(0, 240, 255, 0.4)';
+          elements.vsyncBadge.style.background = 'rgba(0, 240, 255, 0.12)';
+        } else if (state.vsync.mode === 'lock144') {
+          elements.vsyncBadge.textContent = '144 FPS MAX';
+          elements.vsyncBadge.style.color = '#00ff9d';
+          elements.vsyncBadge.style.borderColor = 'rgba(0, 255, 157, 0.4)';
+          elements.vsyncBadge.style.background = 'rgba(0, 255, 157, 0.12)';
         } else {
           elements.vsyncBadge.textContent = `${state.vsync.detectedRefreshRate}Hz VSYNC`;
           elements.vsyncBadge.style.color = '#00ff9d';
@@ -2007,28 +2018,43 @@ PED-1030;João Pedro Esteves;joao.esteves@email.com;02/03/2026;Hardware;Gabinete
         }
       }
       if (elements.vsyncStatusBadge) {
-        elements.vsyncStatusBadge.textContent = state.vsync.mode === 'lock60' 
-          ? 'Travado a 60 FPS (Econômico)' 
-          : `Sincronizado a ${state.vsync.detectedRefreshRate}Hz`;
+        if (state.vsync.mode === 'lock60') {
+          elements.vsyncStatusBadge.textContent = 'Travado a 60 FPS (Econômico)';
+          elements.vsyncStatusBadge.style.color = '#fbbf24';
+        } else if (state.vsync.mode === 'lock120') {
+          elements.vsyncStatusBadge.textContent = 'Sincronizado a 120 FPS (Fluidez)';
+          elements.vsyncStatusBadge.style.color = '#00f0ff';
+        } else if (state.vsync.mode === 'lock144') {
+          elements.vsyncStatusBadge.textContent = 'Sincronizado a 144 FPS (Máximo)';
+          elements.vsyncStatusBadge.style.color = '#00ff9d';
+        } else {
+          elements.vsyncStatusBadge.textContent = `Sincronizado a ${state.vsync.detectedRefreshRate}Hz (Auto)`;
+          elements.vsyncStatusBadge.style.color = '#00ff9d';
+        }
       }
     }
 
     function calibrateRefreshRate(interval) {
-      if (interval > 0 && interval < 100) {
+      if (interval > 3 && interval < 40) {
         calibrationFrames.push(interval);
       }
       if (calibrationFrames.length >= CALIBRATION_SAMPLE_TARGET) {
         const sorted = [...calibrationFrames].sort((a, b) => a - b);
-        const median = sorted[Math.floor(sorted.length / 2)];
+        const start = Math.floor(sorted.length * 0.15);
+        const end = Math.ceil(sorted.length * 0.85);
+        const trimmed = sorted.slice(start, end);
+        const median = trimmed.length > 0
+          ? trimmed.reduce((a, b) => a + b, 0) / trimmed.length
+          : sorted[Math.floor(sorted.length / 2)];
         
         let detected = 60;
-        if (median <= 4.8) detected = 240;
-        else if (median <= 6.5) detected = 165;
-        else if (median <= 7.8) detected = 144;
-        else if (median <= 9.5) detected = 120;
-        else if (median <= 12.0) detected = 90;
-        else if (median <= 14.5) detected = 75;
-        else detected = 60;
+        if (median <= 4.8) detected = 240;      // 240Hz (4.16ms)
+        else if (median <= 6.5) detected = 165; // 165Hz (6.06ms)
+        else if (median <= 7.8) detected = 144; // 144Hz / 145Hz (6.89ms - 6.94ms)
+        else if (median <= 9.5) detected = 120; // 120Hz (8.33ms)
+        else if (median <= 12.0) detected = 90; // 90Hz (11.1ms)
+        else if (median <= 14.5) detected = 75; // 75Hz (13.3ms)
+        else detected = 60;                    // 60Hz (16.6ms)
 
         state.vsync.detectedRefreshRate = detected;
         updateVsyncUI();
@@ -2038,19 +2064,27 @@ PED-1030;João Pedro Esteves;joao.esteves@email.com;02/03/2026;Hardware;Gabinete
     function fpsLoop(now) {
       if (!isLoopRunning) return;
 
-      frameCount++;
-      const delta = now - lastTime;
-
-      // Calibration sampling
-      if (calibrationFrames.length < CALIBRATION_SAMPLE_TARGET && lastTime > 0) {
-        calibrateRefreshRate(delta / frameCount);
+      if (prevFrameTime > 0) {
+        const frameDelta = now - prevFrameTime;
+        if (calibrationFrames.length < CALIBRATION_SAMPLE_TARGET) {
+          calibrateRefreshRate(frameDelta);
+        }
       }
+      prevFrameTime = now;
+      frameCount++;
 
+      const delta = now - lastTime;
       if (delta >= 450) {
         const calculatedFps = Math.round((frameCount * 1000) / delta);
         let displayFps = calculatedFps;
+
+        // Apply selected target cap
         if (state.vsync.mode === 'lock60') {
           displayFps = Math.min(displayFps, 60);
+        } else if (state.vsync.mode === 'lock120') {
+          displayFps = Math.min(displayFps, 120);
+        } else if (state.vsync.mode === 'lock144') {
+          displayFps = Math.min(displayFps, 144);
         } else if (state.vsync.detectedRefreshRate > 60) {
           displayFps = Math.min(displayFps, Math.round(state.vsync.detectedRefreshRate * 1.05));
         }
@@ -2084,6 +2118,7 @@ PED-1030;João Pedro Esteves;joao.esteves@email.com;02/03/2026;Hardware;Gabinete
         isLoopRunning = true;
         frameCount = 0;
         lastTime = performance.now();
+        prevFrameTime = 0;
         requestAnimationFrame(fpsLoop);
       }
     }
@@ -2093,6 +2128,7 @@ PED-1030;João Pedro Esteves;joao.esteves@email.com;02/03/2026;Hardware;Gabinete
       idleTimer = setTimeout(() => {
         if (!isLoopRunning) {
           lastTime = performance.now();
+          prevFrameTime = 0;
           frameCount = 0;
           isLoopRunning = true;
           requestAnimationFrame(fpsLoop);
@@ -2484,6 +2520,16 @@ PED-1030;João Pedro Esteves;joao.esteves@email.com;02/03/2026;Hardware;Gabinete
             elements.vsyncBadge.style.color = '#fbbf24';
             elements.vsyncBadge.style.borderColor = 'rgba(251, 191, 36, 0.4)';
             elements.vsyncBadge.style.background = 'rgba(251, 191, 36, 0.12)';
+          } else if (state.vsync.mode === 'lock120') {
+            elements.vsyncBadge.textContent = '120 FPS FLUIDO';
+            elements.vsyncBadge.style.color = '#00f0ff';
+            elements.vsyncBadge.style.borderColor = 'rgba(0, 240, 255, 0.4)';
+            elements.vsyncBadge.style.background = 'rgba(0, 240, 255, 0.12)';
+          } else if (state.vsync.mode === 'lock144') {
+            elements.vsyncBadge.textContent = '144 FPS MAX';
+            elements.vsyncBadge.style.color = '#00ff9d';
+            elements.vsyncBadge.style.borderColor = 'rgba(0, 255, 157, 0.4)';
+            elements.vsyncBadge.style.background = 'rgba(0, 255, 157, 0.12)';
           } else {
             elements.vsyncBadge.textContent = `${state.vsync.detectedRefreshRate}Hz VSYNC`;
             elements.vsyncBadge.style.color = '#00ff9d';
@@ -2492,15 +2538,32 @@ PED-1030;João Pedro Esteves;joao.esteves@email.com;02/03/2026;Hardware;Gabinete
           }
         }
         if (elements.vsyncStatusBadge) {
-          elements.vsyncStatusBadge.textContent = state.vsync.mode === 'lock60'
-            ? 'Travado a 60 FPS (Econômico)'
-            : `Sincronizado a ${state.vsync.detectedRefreshRate}Hz`;
+          if (state.vsync.mode === 'lock60') {
+            elements.vsyncStatusBadge.textContent = 'Travado a 60 FPS (Econômico)';
+            elements.vsyncStatusBadge.style.color = '#fbbf24';
+          } else if (state.vsync.mode === 'lock120') {
+            elements.vsyncStatusBadge.textContent = 'Sincronizado a 120 FPS (Fluidez)';
+            elements.vsyncStatusBadge.style.color = '#00f0ff';
+          } else if (state.vsync.mode === 'lock144') {
+            elements.vsyncStatusBadge.textContent = 'Sincronizado a 144 FPS (Máximo)';
+            elements.vsyncStatusBadge.style.color = '#00ff9d';
+          } else {
+            elements.vsyncStatusBadge.textContent = `Sincronizado a ${state.vsync.detectedRefreshRate}Hz (Auto)`;
+            elements.vsyncStatusBadge.style.color = '#00ff9d';
+          }
         }
 
-        showToast(state.vsync.mode === 'lock60' 
-          ? 'Modo Econômico ativado: Travado em 60 FPS.' 
-          : `Sincronização Nativa ativada: V-Sync sincronizado a ${state.vsync.detectedRefreshRate}Hz.`
-        );
+        let toastMsg = 'Configuração de V-Sync atualizada.';
+        if (state.vsync.mode === 'lock60') {
+          toastMsg = 'Modo Econômico ativado: Travado em 60 FPS.';
+        } else if (state.vsync.mode === 'lock120') {
+          toastMsg = 'Modo Fluido ativado: Meta balanceada de 120 FPS.';
+        } else if (state.vsync.mode === 'lock144') {
+          toastMsg = 'Modo Máximo ativado: Renderização em 144 FPS / 145 FPS.';
+        } else {
+          toastMsg = `Sincronização Nativa ativada: V-Sync sincronizado a ${state.vsync.detectedRefreshRate}Hz.`;
+        }
+        showToast(toastMsg);
       });
     });
 

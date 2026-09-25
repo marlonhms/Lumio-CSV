@@ -37,7 +37,7 @@ Next
 
 If strBrowserExe <> "" Then
     strFileUri = "file:///" & Replace(strTarget, "\", "/")
-    objShell.Run """" & strBrowserExe & """ --app=""" & strFileUri & """ --enable-gpu-rasterization --enable-zero-copy --ignore-gpu-blocklist --disable-features=UseEcoQoSForBackgroundProcess", 1, False
+    objShell.Run """" & strBrowserExe & """ --app=""" & strFileUri & """ --disable-frame-rate-limit --enable-gpu-rasterization --enable-zero-copy --ignore-gpu-blocklist --disable-features=UseEcoQoSForBackgroundProcess", 1, False
 Else
     objShell.Run """" & strTarget & """", 1, False
 End If

@@ -52,7 +52,7 @@ Set objShortcut = objShell.CreateShortcut(strDesktopPath & "\Lumio CSV.lnk")
 If strBrowserExe <> "" Then
     strFileUri = "file:///" & Replace(strIndexHtml, "\", "/")
     objShortcut.TargetPath = strBrowserExe
-    objShortcut.Arguments = "--app=""" & strFileUri & """ --enable-gpu-rasterization --enable-zero-copy --ignore-gpu-blocklist --disable-features=UseEcoQoSForBackgroundProcess"
+    objShortcut.Arguments = "--app=""" & strFileUri & """ --disable-frame-rate-limit --enable-gpu-rasterization --enable-zero-copy --ignore-gpu-blocklist --disable-features=UseEcoQoSForBackgroundProcess"
     objShortcut.Description = "Lumio CSV - Visualizador & Editor de CSV Ultraleve"
     objShortcut.WorkingDirectory = strProjectDir
     If objFSO.FileExists(strIconFile) Then
