@@ -748,16 +748,7 @@ html, body {
 }
 
 .vsync-badge {
-  font-size: 0.62rem;
-  font-weight: 700;
-  letter-spacing: 0.05em;
-  padding: 1px 4px;
-  border-radius: var(--radius-xs);
-  background: rgba(0, 255, 157, 0.15);
-  color: #00ff9d;
-  border: 1px solid rgba(0, 255, 157, 0.35);
-  margin-left: 2px;
-  text-transform: uppercase;
+  display: none !important;
 }
 
 .fps-indicator-dot {
